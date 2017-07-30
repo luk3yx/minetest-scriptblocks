@@ -59,6 +59,11 @@ minetest.register_abm({
 	end,
 })
 
+	local getdef = function (pos)
+		return minetest.registered_nodes[minetest.get_node(pos).name]
+	end
+	
+
 minetest.register_globalstep(function (dtime)
 	for pos,node in pairs(queue) do
 		local facedir = minetest.facedir_to_dir(node.param2)
@@ -70,21 +75,24 @@ minetest.register_globalstep(function (dtime)
 					local new_pos = vector.add(entity:getpos(), movementDir)
 					local rounded_pos = {x=math.floor(new_pos.x+0.5),y=math.floor(new_pos.y+0.5),z=math.floor(new_pos.z+0.5)}
 					
-					if not minetest.registered_nodes[minetest.get_node(rounded_pos).name].walkable then
-						entity:setpos(new_pos)
-					end
-					entity_queue[entity] = true
-					queue[pos] = nil
-				elseif math.abs(offset.x) < 2 and math.abs(offset.z) < 2 and offset.y < 0 then
-					-- Take the movementDir, and subtract it from my position. Then subtract y=0.5. Players here should move UP.
-					-- No checking for nodes there is required, because then the player's head would already be in a node.
-					local moveUpPos = vector.subtract(vector.subtract(pos, movementDir), {x=0,y=0.5,z=0})
-					local offset = vector.subtract(entity:getpos(), moveUpPos)
-					local new_pos = vector.add(vector.add(entity:getpos(), {x=0,y=1,z=0}), movementDir)
-					if math.abs(offset.x) < 0.5 and math.abs(offset.z) < 0.5 and math.abs(offset.y) < 0.5 then
+					if not getdef(rounded_pos).walkable then
 						entity:setpos(new_pos)
 						entity_queue[entity] = true
 						queue[pos] = nil
+					end
+				elseif math.abs(offset.x) < 2 and math.abs(offset.z) < 2 and offset.y < 0 then
+					-- Take the movementDir, and subtract it from my position. Then subtract y=0.5. Players here should move UP.
+					local moveUpPos = vector.subtract(vector.subtract(pos, movementDir), {x=0,y=0.5,z=0})
+					local offset = vector.subtract(entity:getpos(), moveUpPos)
+					local new_pos = vector.add(vector.add(entity:getpos(), {x=0,y=1,z=0}), movementDir)
+					local obpos = vector.add(pos, {x=0,y=1,z=0}) -- check the node 1 above of us.
+					local obpos2 = vector.add(pos, {x=0,y=2,z=0}) -- 2 above.
+					if not (getdef(obpos).walkable or getdef(obpos2).walkable) then
+						if math.abs(offset.x) < 0.5 and math.abs(offset.z) < 0.5 and math.abs(offset.y) < 0.5 then
+							entity:setpos(new_pos)
+							entity_queue[entity] = true
+							queue[pos] = nil
+						end
 					end
 				end
 			end
