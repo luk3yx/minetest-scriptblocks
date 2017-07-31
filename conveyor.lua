@@ -91,7 +91,7 @@ minetest.register_globalstep(function (dtime)
 		if name == "rmod:conveyor" then  -- I might replace this with a group, e.g. def.groups.conveyor, so you can set the speed.
 			local facing = node.param2  -- Param2 is the facedir as defined above - conveyors face the opposite direction they move you.
 				local direction = minetest.facedir_to_dir(facing)
-				local movement = vector.multiply(direction, {x=-1, y=-1, z=-1})  -- We reversed the facing system recently...then reversed it back.
+				local movement = vector.multiply(direction, {x=1, y=1, z=1})  -- We reversed the facing system recently.
 			
 			local newpos = vector.add(position, movement)
 				local newrpos = {x=round(newpos.x), y=round(newpos.y), z=round(newpos.z)}
