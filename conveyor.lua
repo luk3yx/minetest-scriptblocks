@@ -9,7 +9,7 @@ local rmod_conveyor_top_animated = {
 			},
 		}
 
-local rmod_conveyor_top_animated_2_reversed = {
+local rmod_conveyor_top_animated_2 = {
 			name = "rmod_conveyor_top_animated_2.png", -- Higher resolution version with 4 frames as opposed to 2.
 			backface_culling = true,
 			animation = {
@@ -20,7 +20,7 @@ local rmod_conveyor_top_animated_2_reversed = {
 			},
 		}
 
-local rmod_conveyor_top_animated_2 = { -- Reversed animation for the Z+ face.
+local rmod_conveyor_top_animated_2_reversed = { -- Reversed animation for the Z+ face.
 			name = "rmod_conveyor_top_animated_2_reversed.png", -- Higher resolution version with 4 frames as opposed to 2.
 			backface_culling = true,
 			animation = {
@@ -91,7 +91,7 @@ minetest.register_globalstep(function (dtime)
 		if name == "rmod:conveyor" then  -- I might replace this with a group, e.g. def.groups.conveyor, so you can set the speed.
 			local facing = node.param2  -- Param2 is the facedir as defined above - conveyors face the opposite direction they move you.
 				local direction = minetest.facedir_to_dir(facing)
-				local movement = vector.multiply(direction, {x=1, y=1, z=1})  -- We reversed the facing system recently.
+				local movement = vector.multiply(direction, {x=-1, y=-1, z=-1})  -- We reversed the facing system recently...then reversed it back.
 			
 			local newpos = vector.add(position, movement)
 				local newrpos = {x=round(newpos.x), y=round(newpos.y), z=round(newpos.z)}
@@ -136,7 +136,7 @@ minetest.register_globalstep(function (dtime)
 		for _,entity in pairs(minetest.get_objects_inside_radius(pos, 1)) do
 			if entity and not entity_queue[entity] then
 				local offset = vector.subtract(entity:getpos(), pos)
-				local movementDir = vector.multiply(facedir, {x=1,y=1,z=1})
+				local movementDir = vector.multiply(facedir, {x=-1,y=-1,z=-1})
 				if math.abs(offset.x) < 0.8 and math.abs(offset.z) < 0.8 and offset.y > 0 then
 					local new_pos = vector.add(entity:getpos(), movementDir)
 					local rounded_pos = {x=math.floor(new_pos.x+0.5),y=math.floor(new_pos.y+0.5),z=math.floor(new_pos.z+0.5)}
