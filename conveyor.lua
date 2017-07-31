@@ -68,7 +68,7 @@ minetest.register_globalstep(function (dtime)
 	for pos,node in pairs(queue) do
 		local facedir = minetest.facedir_to_dir(node.param2)
 		for _,entity in pairs(minetest.get_objects_inside_radius(pos, 1)) do
-			if entity and not entity_queue[entity:get_player_name()] then
+			if entity and not entity_queue[entity:get_id()] then
 				local offset = vector.subtract(entity:getpos(), pos)
 				local movementDir = vector.multiply(facedir, {x=-1,y=-1,z=-1})
 				if math.abs(offset.x) < 0.8 and math.abs(offset.z) < 0.8 and offset.y > 0 then
@@ -77,7 +77,7 @@ minetest.register_globalstep(function (dtime)
 					
 					if not getdef(rounded_pos).walkable then
 						entity:setpos(new_pos)
-						entity_queue[entity:get_player_name()] = true
+						entity_queue[entity:get_id()] = true
 						queue[pos] = nil
 					end
 				elseif math.abs(offset.x) < 2 and math.abs(offset.z) < 2 and offset.y < 0 then
@@ -90,7 +90,7 @@ minetest.register_globalstep(function (dtime)
 					if not (getdef(obpos).walkable or getdef(obpos2).walkable) then
 						if math.abs(offset.x) < 0.5 and math.abs(offset.z) < 0.5 and math.abs(offset.y) < 0.5 then
 							entity:setpos(new_pos)
-							entity_queue[entity:get_player_name()] = true
+							entity_queue[entity:get_id()] = true
 							queue[pos] = nil
 						end
 					end
