@@ -44,21 +44,6 @@ minetest.register_node("rmod:conveyor", {
 	paramtype2 = "facedir",
 })
 
-local queue = {}
-local entity_queue = {}
-
-minetest.register_abm({
-	label = "Conveyor Step",
-	nodenames = {"rmod:conveyor"},
-	neighbors = {},
-	interval = 1,
-	chance = 1,
-	action = function (pos, node)
-		entity_queue = {}
-		queue[pos] = node
-	end,
-})
-
 local getnode = function (pos)
 	return minetest.get_node(pos)
 end
@@ -131,40 +116,6 @@ minetest.register_globalstep(function (dtime)
 			end
 		end
 	end
-	--[[for pos,node in pairs(queue) do
-		local facedir = minetest.facedir_to_dir(node.param2)
-		for _,entity in pairs(minetest.get_objects_inside_radius(pos, 1)) do
-			if entity and not entity_queue[entity] then
-				local offset = vector.subtract(entity:getpos(), pos)
-				local movementDir = vector.multiply(facedir, {x=-1,y=-1,z=-1})
-				if math.abs(offset.x) < 0.8 and math.abs(offset.z) < 0.8 and offset.y > 0 then
-					local new_pos = vector.add(entity:getpos(), movementDir)
-					local rounded_pos = {x=math.floor(new_pos.x+0.5),y=math.floor(new_pos.y+0.5),z=math.floor(new_pos.z+0.5)}
-					
-					if not getdef(rounded_pos).walkable then
-						entity:setpos(new_pos)
-						entity_queue[entity] = true
-						queue[pos] = nil
-					end
-				elseif math.abs(offset.x) < 2 and math.abs(offset.z) < 2 and offset.y < 0 then
-					-- Take the movementDir, and subtract it from my position. Then subtract y=0.5. Players here should move UP.
-					local moveUpPos = vector.subtract(vector.subtract(pos, movementDir), {x=0,y=0.5,z=0})
-					local offset = vector.subtract(entity:getpos(), moveUpPos)
-					local new_pos = vector.add(vector.add(entity:getpos(), {x=0,y=1,z=0}), movementDir)
-					local obpos = vector.add(pos, {x=0,y=1,z=0}) -- check the node 1 above of us.
-					local obpos2 = vector.add(pos, {x=0,y=2,z=0}) -- 2 above.
-					if not (getdef(obpos).walkable or getdef(obpos2).walkable) then
-						if math.abs(offset.x) < 0.5 and math.abs(offset.z) < 0.5 and math.abs(offset.y) < 0.5 then
-							entity:setpos(new_pos)
-							entity_queue[entity] = true
-							queue[pos] = nil
-						end
-					end
-				end
-			end
-		end
-	end]]
-	--queue = {}
 end)
 
 
