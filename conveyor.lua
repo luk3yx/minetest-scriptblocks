@@ -78,7 +78,7 @@ minetest.register_globalstep(function (dtime)
 	timer = timer + dtime
 	if timer > 1 then timer = 0 else return end  -- The code below should only execute once every second.
 	for _,entity in pairs(minetest.object_refs) do  -- We cycle the entities because it then means we don't have to try to keep a queue of each entity.
-		local isplayer = entity.get_player_name  -- We have is_player, but it doesn't seem to work too well atm.
+		local isplayer = entity:is_player()
 		
 		local position = entity:getpos()
 			local roundedpos = {x=round(position.x), y=round(position.y), z=round(position.z)}
@@ -99,8 +99,8 @@ minetest.register_globalstep(function (dtime)
 				local newname = getname(newrpos)
 				local newdef = getdef(newrpos)
 			
-			-- If we can move the player forward, we'll need to check here anyway.
 			-- If we can move any entity forward and up, we'll need to check here.
+			-- If we can move the player forward, we'll need to check here anyway.
 			local upos = vector.add(newpos, {x=0, y=1, z=0})
 				local roundedupos = {x=round(upos.x), y=round(upos.y), z=round(upos.z)}
 				local unode = getnode(roundedupos)
@@ -126,7 +126,7 @@ minetest.register_globalstep(function (dtime)
 						entity:setpos(upos)
 					end
 				end
-			elseif (not is_player) or (not udef.walkable) then  -- When we move the entity, either the entity's not a player, or they have head room.
+			elseif (not isplayer) or (not udef.walkable) then  -- When we move the entity, either the entity's not a player, or they have head room.
 				entity:setpos(newpos)
 			end
 		end
