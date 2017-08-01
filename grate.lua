@@ -16,7 +16,7 @@ local function grate_step(pos, offset)
 	if not neigh_def then return end -- Unknown nodes can't flow.
 	if not neigh_def.liquidtype then return end -- Non-liquids can't flow at all.
 	
-	print("Neighbor is liquid.")
+	--print("Neighbor is liquid.")
 	
 	-- Check its level.
 	local level = neigh_node.param2 % 16
@@ -24,7 +24,7 @@ local function grate_step(pos, offset)
 	if neigh_def.liquidtype == "source" then level = 16 end
 	if level < 2 then return end -- Level < 2 water stops flowing within two blocks.
 	
-	print("Neighbor is high enough level.")
+	--print("Neighbor is high enough level.")
 	
 	-- Check the opposing neighbor.
 	local opposite = vector.subtract(pos, offset)
@@ -45,17 +45,17 @@ local function grate_step(pos, offset)
 		if opposite_level > level - 2 or opposite_def.liquidtype == "source" then return end
 	end -- Liquids can't flow into higher level liquids.
 	
-	print("Opposite is floodable.")
+	--print("Opposite is floodable.")
 	
 	local neigh_flowing = neigh_def.liquid_alternative_flowing
 	if not neigh_flowing then return end -- Improperly configured liquids can't flow.
 	
-	print("Liquid is configured properly.")
+	--print("Liquid is configured properly.")
 	
 	minetest.set_node(opposite, {
 		name = neigh_flowing,
 		param1 = neigh_node.param1,
-		param2 = neigh_node.param2 == 0 and 6 or neigh_node.param2 - 2
+		param2 = --[[neigh_node.param2 == 0]]neigh_def.liquidtype == "source" and 6 or neigh_node.param2 - 2
 	})
 end
 

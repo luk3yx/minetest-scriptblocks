@@ -39,7 +39,7 @@ minetest.register_node("rmod:conveyor", {
 		"rmod_conveyor_side.png", "rmod_conveyor_side.png",
 		rmod_conveyor_top_animated_2_reversed, rmod_conveyor_top_animated_2 -- You have to reverse one of the faces to go UP, not DOWN.
 	},
-	groups = {oddly_breakable_by_hand = 1},
+	groups = {oddly_breakable_by_hand = 1, conveyor = 1},
 	use_texture_alpha = true,
 	paramtype2 = "facedir",
 })
@@ -73,7 +73,7 @@ minetest.register_globalstep(function (dtime)
 			local name = getname(surface)
 			local def = getdef(surface)
 		
-		if name == "rmod:conveyor" then  -- I might replace this with a group, e.g. def.groups.conveyor, so you can set the speed.
+		if def.groups.conveyor == 1 then  -- I might replace this with a group, e.g. def.groups.conveyor, so you can set the speed.
 			local facing = node.param2  -- Param2 is the facedir as defined above - conveyors face the opposite direction they move you.
 				local direction = minetest.facedir_to_dir(facing)
 				local movement = vector.multiply(direction, {x=1, y=1, z=1})  -- We reversed the facing system recently.
@@ -93,7 +93,7 @@ minetest.register_globalstep(function (dtime)
 				local udef = getdef(roundedupos)
 			
 			if newdef.walkable then
-				if newname == "rmod:conveyor" and newnode.param2 == facing then
+				if newdef.groups.conveyor == 1 and newnode.param2 == facing then
 					-- Okay, so the entity will be moving into a node.
 					-- But it just so happens that this node is also a conveyor!
 					-- Plus, it's moving in the same direction!
@@ -119,3 +119,75 @@ minetest.register_globalstep(function (dtime)
 end)
 
 
+
+if not minetest.get_modpath("mesecons") then return end -- There's no point of using meseconveyors when mesecons doesn't exist.
+
+-- I present... Meseconveyors!
+
+local meseconveyor_rules = {
+	{x=0,  y=0,  z=-1},
+	{x=1,  y=0,  z=0},
+	{x=-1, y=0,  z=0},
+	{x=0,  y=0,  z=1},
+	{x=1,  y=1,  z=0},
+	{x=1,  y=-1, z=0},
+	{x=-1, y=1,  z=0},
+	{x=-1, y=-1, z=0},
+	{x=0,  y=1,  z=1},
+	{x=0,  y=-1, z=1},
+	{x=0,  y=1,  z=-1},
+	{x=0,  y=-1, z=-1},
+	{x=0,  y=-1, z=0},
+}
+
+local overlay_off = "^rmod_meseconveyor_overlay_off.png"
+local overlay_on = "^rmod_meseconveyor_overlay_on.png"
+
+local side_overlay_off = "^rmod_meseconveyor_side_overlay_off.png"
+local side_overlay_on = "^rmod_meseconveyor_side_overlay_on.png"
+
+local rmod_meseconveyor_top_off = "rmod_conveyor_top_off.png" .. overlay_off -- Un-animated version of the conveyor texture.
+local rmod_meseconveyor_top_off_reversed = "rmod_conveyor_top_off_reversed.png" .. overlay_off -- I probably should just [rotate it.
+
+local rmod_meseconveyor_top_animated_2 = rmod_conveyor_top_animated_2
+rmod_meseconveyor_top_animated_2.name = rmod_conveyor_top_animated_2.name .. overlay_on
+
+local rmod_meseconveyor_top_animated_2_reversed = rmod_conveyor_top_animated_2_reversed
+rmod_meseconveyor_top_animated_2_reversed.name = rmod_conveyor_top_animated_2_reversed.name .. overlay_on
+
+minetest.register_node("rmod:meseconveyor_off", {
+	description = "Meseconveyor",
+	tiles = {
+		rmod_meseconveyor_top_off, rmod_meseconveyor_top_off,
+		"rmod_conveyor_side.png" .. side_overlay_off, "rmod_conveyor_side.png" .. side_overlay_off,
+		rmod_meseconveyor_top_off_reversed, rmod_meseconveyor_top_off
+	},
+	groups = {oddly_breakable_by_hand = 1, mesecon = 2},
+	use_texture_alpha = true,
+	paramtype2 = "facedir",
+	mesecons = {effector = {
+		rules = meseconveyor_rules,
+		action_on = function (pos, node)
+			minetest.swap_node(pos, {name = "rmod:meseconveyor_on", param2 = node.param2})
+		end,
+	}}
+})
+
+minetest.register_node("rmod:meseconveyor_on", {
+	description = "Active Meseconveyor (you hacker you!)",
+	tiles = {
+		rmod_meseconveyor_top_animated_2, rmod_meseconveyor_top_animated_2,
+		"rmod_conveyor_side.png" .. side_overlay_on, "rmod_conveyor_side.png" .. side_overlay_on,
+		rmod_meseconveyor_top_animated_2_reversed, rmod_meseconveyor_top_animated_2
+	},
+	groups = {oddly_breakable_by_hand = 1, conveyor = 1, not_in_creative_inventory = 1, mesecon = 2},
+	drop = "rmod:meseconveyor_off",
+	use_texture_alpha = true,
+	paramtype2 = "facedir",
+	mesecons = {effector = {
+		rules = meseconveyor_rules,
+		action_off = function (pos, node)
+			minetest.swap_node(pos, {name = "rmod:meseconveyor_off", param2 = node.param2})
+		end,
+	}}
+})
