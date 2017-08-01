@@ -73,7 +73,7 @@ minetest.register_globalstep(function (dtime)
 			local name = getname(surface)
 			local def = getdef(surface)
 		
-		if def.groups.conveyor == 1 then  -- I might replace this with a group, e.g. def.groups.conveyor, so you can set the speed.
+		if def and def.groups.conveyor == 1 then  -- I might replace this with a group, e.g. def.groups.conveyor, so you can set the speed.
 			local facing = node.param2  -- Param2 is the facedir as defined above - conveyors face the opposite direction they move you.
 				local direction = minetest.facedir_to_dir(facing)
 				local movement = vector.multiply(direction, {x=1, y=1, z=1})  -- We reversed the facing system recently.
