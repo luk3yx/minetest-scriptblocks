@@ -15,11 +15,26 @@ list[current_player;main;0,5;8,4;]
 ]])
 		
 		local infotext = "Empty Crate"
-		if item_meta and item_meta ~= {} then
+		if item_meta and #item_meta > 0 then
 			infotext = "Crate containing:"
+			local i = 0
 			for _,istack in pairs(item_meta) do
 				node_meta:get_inventory():add_item("main", ItemStack(istack))
-				infotext = infotext .. "\n" .. ItemStack(istack):to_string()
+				
+				if i < 3 then
+					local stack = ItemStack(istack)
+						local name = stack:get_name()
+							local def = minetest.registered_items[name] or minetest.registered_nodes[name]
+							local desc = def and def.description or name
+						local count = stack:get_count()
+				
+					infotext = infotext .. "\n" .. tostring(count) .. "x " .. desc
+				end
+				i = i + 1
+			end
+			
+			if i > 3 then
+				infotext = infotext .. "\n" .. "...and more."
 			end
 		end
 		
@@ -36,10 +51,24 @@ list[current_player;main;0,5;8,4;]
 		end
 		
 		local infotext = "Empty Crate"
-		if string_inventory ~= {} then
+		if not node_meta:get_inventory():is_empty("main") then
 			infotext = "Crate containing:"
+			local i = 0
 			for _,istack in pairs(string_inventory) do
-				infotext = infotext .. "\n" .. ItemStack(istack):to_string()
+				if i < 3 then
+					local stack = ItemStack(istack)
+						local name = stack:get_name()
+							local def = minetest.registered_items[name] or minetest.registered_nodes[name]
+							local desc = def and def.description or name
+						local count = stack:get_count()
+				
+					infotext = infotext .. "\n" .. tostring(count) .. "x " .. desc
+				end
+				i = i + 1
+			end
+			
+			if i > 3 then
+				infotext = infotext .. "\n" .. "...and more."
 			end
 		end
 		
