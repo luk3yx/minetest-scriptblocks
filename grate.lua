@@ -3,7 +3,7 @@ minetest.register_node("rmod:grate", {
 	tiles = {"rmod_grate.png"},
 	groups = {oddly_breakable_by_hand = 1},
 	use_texture_alpha = true,
-	drawtype = "allfaces", --"glasslike",
+	drawtype = "glasslike",
 	paramtype = "light",
 })
 
