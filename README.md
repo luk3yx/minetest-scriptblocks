@@ -6,6 +6,16 @@ Conveyors
 
 Conveyors are nodes that can carry entities, such as players and items. There are a few bugs with it, but it works fine for the most part.
 
+Meseconveyors
+-
+
+Meseconveyors are conveyors which can be activated and deactivated with mesecons.
+
+Digiconveyors
+-
+
+Digiconveyors can not only be turned on and off with digilines, but they can also be reversed (which flips their facing direction). Simply send the messages "on", "off", and "reverse", to the correct channel.
+
 Crates
 -
 
