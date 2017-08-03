@@ -34,7 +34,7 @@ local function grate_step(pos, offset)
 		if opposite_def.walkable then return end
 		
 		local opposite_level = opposite_node.param2 % 16
-		if opposite_level < 8 then opposite_level = opposite_level * 2 end
+		if opposite_level < 8 then opposite_level = opposite_level * 2 else opposite_level = (opposite_level - 8) * 2 end
 		if opposite_def.liquidtype == "source" then opposite_level = 16 end
 		
 		if opposite_level > level - 2 or opposite_def.liquidtype == "source" then return end
@@ -73,12 +73,57 @@ local function grate_step(pos, offset)
 	end
 	
 	local new_param2 = neigh_def.liquidtype == "source" and 6 or neigh_node.param2 - 2
-	if new_param2 < 1 then return end
+	if new_param2 < 0 then return end
 	minetest.set_node(flow_to, {
 		name = neigh_flowing,
 		param1 = neigh_node.param1,
 		param2 = new_param2
 	})
+	
+	-- And we're done.
+	
+	
+	
+	-- WAIT! We're not done.
+	if offset.y == 0 then
+		local left_flow = {x = offset.z, y = 0, z = -offset.x}
+			local left_pos = vector.add(pos, left_flow)
+			local left_node = minetest.get_node(left_pos)
+			local left_name
+			if left_node then left_name = left_node.name end
+			local left_def = left_name and minetest.registered_nodes[left_name]
+		local right_flow = {x = -offset.z, y = 0, z = offset.x}
+			local right_pos = vector.add(pos, right_flow)
+			local right_node = minetest.get_node(right_pos)
+			local right_name
+			if right_node then right_name = right_node.name end
+			local right_def = right_name and minetest.registered_nodes[right_name]
+		
+		local left_level = left_node.param2 % 16
+		if left_level < 8 then left_level = left_level * 2 else left_level = (left_level - 8) * 2 end
+		if left_def and left_def.liquidtype == "source" then left_level = 16 end
+		
+		local right_level = right_node.param2 % 16
+		if right_level < 8 then right_level = right_level * 2 else right_level = (right_level - 8) * 2 end
+		if right_def and right_def.liquidtype == "source" then right_level = 16 end
+		
+		if left_node and (left_name == "air" or (left_def.liquidtype == "flowing" and left_level < level - 2)) then
+			-- May as well spread here, too.
+			minetest.set_node(left_pos, {
+				name = neigh_flowing,
+				param1 = neigh_node.param1,
+				param2 = new_param2
+			})
+		end
+		if right_node and (right_name == "air" or (right_def.liquidtype == "flowing" and right_level < level - 2)) then
+			-- May as well spread here, too.
+			minetest.set_node(right_pos, {
+				name = neigh_flowing,
+				param1 = neigh_node.param1,
+				param2 = new_param2
+			})
+		end
+	end
 end
 
 minetest.register_abm({
