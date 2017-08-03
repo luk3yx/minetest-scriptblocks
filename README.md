@@ -25,3 +25,13 @@ Grates
 -
 
 Grates are nodes which let water flow through, but not players or items.
+
+Mesegrates
+-
+
+Mesegrates are self-explanatory - power them, and they let liquids flow.
+
+Digigrates
+-
+
+Digigrates can be adjusted by sending messages - they include "on", "off", "toggle" and "set". That last one, "set", is sent as a table {command = "sent", value = x}, substituting x for the percentage of water you want to pass through (although, tbh, it's more complicated than that).

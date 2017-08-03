@@ -33,22 +33,6 @@ local rmod_conveyor_top_animated_2_reversed = { -- Reversed animation for the Z+
 
 
 
-local meseconveyor_rules = {
-	{x=0,  y=0,  z=-1},
-	{x=1,  y=0,  z=0},
-	{x=-1, y=0,  z=0},
-	{x=0,  y=0,  z=1},
-	{x=1,  y=1,  z=0},
-	{x=1,  y=-1, z=0},
-	{x=-1, y=1,  z=0},
-	{x=-1, y=-1, z=0},
-	{x=0,  y=1,  z=1},
-	{x=0,  y=-1, z=1},
-	{x=0,  y=1,  z=-1},
-	{x=0,  y=-1, z=-1},
-	{x=0,  y=-1, z=0},
-}
-
 local overlay_off = "^rmod_meseconveyor_overlay_off.png"
 local overlay_on = "^rmod_meseconveyor_overlay_on.png"
 
@@ -75,7 +59,7 @@ minetest.register_node("rmod:meseconveyor_off", {
 	use_texture_alpha = true,
 	paramtype2 = "facedir",
 	mesecons = {effector = {
-		rules = meseconveyor_rules,
+		--rules = meseconveyor_rules,
 		action_on = function (pos, node)
 			minetest.swap_node(pos, {name = "rmod:meseconveyor_on", param2 = node.param2})
 		end,
@@ -94,7 +78,7 @@ minetest.register_node("rmod:meseconveyor_on", {
 	use_texture_alpha = true,
 	paramtype2 = "facedir",
 	mesecons = {effector = {
-		rules = meseconveyor_rules,
+		--rules = meseconveyor_rules,
 		action_off = function (pos, node)
 			minetest.swap_node(pos, {name = "rmod:meseconveyor_off", param2 = node.param2})
 		end,
