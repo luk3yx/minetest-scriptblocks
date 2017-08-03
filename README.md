@@ -14,7 +14,7 @@ Meseconveyors are conveyors which can be activated and deactivated with mesecons
 Digiconveyors
 -
 
-Digiconveyors can not only be turned on and off with digilines, but they can also be reversed (which flips their facing direction). Simply send the messages "on", "off", and "reverse", to the correct channel.
+Digiconveyors can not only be turned on and off with digilines, but they can also be reversed (which flips their facing direction). The messages available at the moment are "on", "off", "toggle" (functions as both "on" and "off"), "reverse" (inverts the direction), "left" (turns left 90 degrees) and "right".
 
 Crates
 -

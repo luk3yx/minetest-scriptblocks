@@ -70,10 +70,14 @@ local function digiconveyor_off_digiline_receive (pos, node, channel, msg)
 	local setchan = minetest.get_meta(pos):get_string("channel")
 	local param2 = minetest.get_node(pos).param2
 	if channel == setchan then
-		if msg == "on" then
+		if msg == "on" or msg == "toggle" then
 			minetest.swap_node(pos, {name = "rmod:digiconveyor_on", param2 = node.param2})
 		elseif msg == "reverse" then
 			minetest.swap_node(pos, {name = node.name, param2 = (node.param2 + 2) % 4})
+		elseif msg == "right" then
+			minetest.swap_node(pos, {name = node.name, param2 = (node.param2 + 1) % 4})
+		elseif msg == "left" then
+			minetest.swap_node(pos, {name = node.name, param2 = (node.param2 - 1) % 4})
 		end
 	end
 end
@@ -82,10 +86,14 @@ local function digiconveyor_on_digiline_receive (pos, node, channel, msg)
 	local setchan = minetest.get_meta(pos):get_string("channel")
 	local param2 = minetest.get_node(pos).param2
 	if channel == setchan then
-		if msg == "off" then
+		if msg == "off" or msg == "toggle" then
 			minetest.swap_node(pos, {name = "rmod:digiconveyor_off", param2 = node.param2})
 		elseif msg == "reverse" then
 			minetest.swap_node(pos, {name = node.name, param2 = (node.param2 + 2) % 4})
+		elseif msg == "right" then
+			minetest.swap_node(pos, {name = node.name, param2 = (node.param2 + 1) % 4})
+		elseif msg == "left" then
+			minetest.swap_node(pos, {name = node.name, param2 = (node.param2 - 1) % 4})
 		end
 	end
 end
