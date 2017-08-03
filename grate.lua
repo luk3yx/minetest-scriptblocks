@@ -18,8 +18,8 @@ local function grate_step(pos, offset)
 	
 	-- Check its level.
 	local level = neigh_node.param2 % 16
-	if level < 8 then level = level * 2 else level = (level - 8) * 2 end
-	if neigh_def.liquidtype == "source" then level = 16 end
+	if level > 8 then level = level - 8 end
+	if neigh_def.liquidtype == "source" then level = 8 end
 	
 	-- Check the opposing neighbor.
 	local opposite = vector.subtract(pos, offset)
@@ -29,15 +29,17 @@ local function grate_step(pos, offset)
 	local opposite_def = minetest.registered_nodes[opposite_name]
 	if not opposite_def then return end
 	
+	local flowto_opposite = true
+	
 	if not opposite_def.floodable then 
-		if not opposite_def.liquidtype then return end
-		if opposite_def.walkable then return end
+		if not opposite_def.liquidtype then flowto_opposite = false end
+		if opposite_def.walkable then flowto_opposite = false end
 		
 		local opposite_level = opposite_node.param2 % 16
-		if opposite_level < 8 then opposite_level = opposite_level * 2 else opposite_level = (opposite_level - 8) * 2 end
-		if opposite_def.liquidtype == "source" then opposite_level = 16 end
+		if opposite_level > 8 then opposite_level = opposite_level - 8 end
+		if opposite_def.liquidtype == "source" then opposite_level = 8 end
 		
-		if opposite_level > level - 2 or opposite_def.liquidtype == "source" then return end
+		if opposite_level > level - 2 or opposite_def.liquidtype == "source" then flowto_opposite = false end
 	end -- Liquids can't flow into higher level liquids.
 	local neigh_flowing = neigh_def.liquid_alternative_flowing
 	if not neigh_flowing then return end -- Improperly configured liquids can't flow.
@@ -74,12 +76,13 @@ local function grate_step(pos, offset)
 	
 	local new_param2 = neigh_def.liquidtype == "source" and 6 or neigh_node.param2 - 2
 	if new_param2 < 0 then return end
-	minetest.set_node(flow_to, {
-		name = neigh_flowing,
-		param1 = neigh_node.param1,
-		param2 = new_param2
-	})
-	
+	if flowto_opposite then
+		minetest.set_node(flow_to, {
+			name = neigh_flowing,
+			param1 = neigh_node.param1,
+			param2 = new_param2
+		})
+	end
 	-- And we're done.
 	
 	
@@ -100,12 +103,12 @@ local function grate_step(pos, offset)
 			local right_def = right_name and minetest.registered_nodes[right_name]
 		
 		local left_level = left_node.param2 % 16
-		if left_level < 8 then left_level = left_level * 2 else left_level = (left_level - 8) * 2 end
-		if left_def and left_def.liquidtype == "source" then left_level = 16 end
+		if left_level > 8 then left_level = left_level - 8 end
+		if left_def.liquidtype == "source" then left_level = 8 end
 		
 		local right_level = right_node.param2 % 16
-		if right_level < 8 then right_level = right_level * 2 else right_level = (right_level - 8) * 2 end
-		if right_def and right_def.liquidtype == "source" then right_level = 16 end
+		if right_level > 8 then right_level = right_level - 8 end
+		if right_def.liquidtype == "source" then right_level = 8 end
 		
 		if left_node and (left_name == "air" or (left_def.liquidtype == "flowing" and left_level < level - 2)) then
 			-- May as well spread here, too.
