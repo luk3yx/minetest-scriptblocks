@@ -32,6 +32,21 @@ local function stringify(t)
 	return minetest.serialize(t):sub(("return "):len()+1, -1)
 end
 
+local function compare(a, b)
+	-- Compare two tables by comparing their values -
+	-- also make sure to support nested tables.
+	if type(a) ~= "table" or type(b) ~= "table" then return a == b end
+	
+	for i,j in pairs(a) do
+		if not compare(j, b[i]) then return false end
+	end
+	for i,j in pairs(b) do
+		if not compare(j, a[i]) then return false end
+	end
+	
+	return true
+end
+
 -- To avoid lag and stack overflows, we add the data to a queue and then execute it with a globalstep.
 local queue = {}
 
@@ -318,15 +333,14 @@ field[b;B;${b}]
 		elseif dir.z == 1 then truth[5] = true; falsth[6] = true
 		elseif dir.z == -1 then truth[6] = true; falsth[5] = true end
 		
-		-- TODO: Add an actual, recursive table comparison function.
-		if type(a) == "table" then
+		--[[if type(a) == "table" then
 			a = stringify(a) or a
 		end
 		if type(b) == "table" then
 			b = stringify(b) or b
-		end
+		end]]
 		
-		return unpack(a == b and {info, truth} or {info, falsth})
+		return unpack(compare(a, b) and {info, truth} or {info, falsth})
 	end
 })
 minetest.register_node("rmod:scriptblock_guide", {
