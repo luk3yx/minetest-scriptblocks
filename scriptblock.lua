@@ -28,6 +28,10 @@ local function set_storage(data)
 	return storage:set_string("scriptblock", minetest.serialize(data))
 end
 
+local function stringify(t)
+	return minetest.serialize(t):sub(("return "):len()+1, -1)
+end
+
 -- To avoid lag and stack overflows, we add the data to a queue and then execute it with a globalstep.
 local queue = {}
 
@@ -78,8 +82,12 @@ rmod.scriptblock.run = function (pos, sender, info, last, channel)
 	return local_queue
 end
 rmod.scriptblock.escape = function (text, info, last)
-	if type(info) == "table" then info = minetest.serialize(info) or "" end
-	if type(last) == "table" then last = minetest.serialize(last) or "" end
+	-- We handle these separately, so that we don't need to stringify it.
+	if text == "@info" then return info end
+	if text == "@last" then return last end
+	
+	if type(info) == "table" then info = stringify(info) or "" end
+	if type(last) == "table" then last = stringify(last) or "" end
 	return text and text:gsub("@info", info or ""):gsub("@last", last or "") or ""
 end
 
@@ -144,7 +152,7 @@ field[value;Value;${value}]
 
 		set_storage(store)
 		
-		debug("SET " .. channel .. "." .. varname .. ": " .. value)
+		debug("SET " .. channel .. "." .. tostring(varname) .. ": " .. tostring(value))
 		
 		return info
 	end
@@ -185,7 +193,7 @@ field[varname;Varname;${varname}]
 		
 		if not store[channel] then store[channel] = {} end
 		
-		debug("GET " .. channel .. "." .. varname .. ": " .. (store[channel][varname] or ""))
+		debug("GET " .. tostring(channel) .. "." .. tostring(varname) .. ": " .. tostring(store[channel][varname] or ""))
 		
 		return store[channel][varname] or ""
 	end
@@ -254,10 +262,12 @@ field[message;Message;${message}]
 			local plr = rmod.scriptblock.escape(meta:get_string("player"), info, last)
 			local msg = rmod.scriptblock.escape(meta:get_string("message"), info, last)
 		
+		if type(msg) == "table" then msg = stringify(msg) end
+		
 		if plr == "" then
-			minetest.chat_send_all("Scriptblock -> all: " .. msg)
+			minetest.chat_send_all("Scriptblock -> all: " .. tostring(msg))
 		else
-			minetest.chat_send_player(plr, "Scriptblock -> you: " .. msg)
+			minetest.chat_send_player(plr, "Scriptblock -> you: " .. tostring(msg))
 		end
 		
 		return info
@@ -308,11 +318,12 @@ field[b;B;${b}]
 		elseif dir.z == 1 then truth[5] = true; falsth[6] = true
 		elseif dir.z == -1 then truth[6] = true; falsth[5] = true end
 		
+		-- TODO: Add an actual, recursive table comparison function.
 		if type(a) == "table" then
-			a = minetest.serialize(a) or a
+			a = stringify(a) or a
 		end
 		if type(b) == "table" then
-			b = minetest.serialize(b) or b
+			b = stringify(b) or b
 		end
 		
 		return unpack(a == b and {info, truth} or {info, falsth})
@@ -375,7 +386,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return tostring((tonumber(a) or 0) + (tonumber(b) or 0))
+		return (tonumber(a) or 0) + (tonumber(b) or 0)
 	end
 })
 minetest.register_node("rmod:scriptblock_subtract", {
@@ -411,7 +422,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return tostring((tonumber(a) or 0) - (tonumber(b) or 0))
+		return (tonumber(a) or 0) - (tonumber(b) or 0)
 	end
 })
 minetest.register_node("rmod:scriptblock_multiply", {
@@ -447,7 +458,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return tostring((tonumber(a) or 0) * (tonumber(b) or 0))
+		return (tonumber(a) or 0) * (tonumber(b) or 0)
 	end
 })
 minetest.register_node("rmod:scriptblock_divide", {
@@ -483,7 +494,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return tostring((tonumber(a) or 0) / (tonumber(b) or 0))
+		return (tonumber(a) or 0) / (tonumber(b) or 0)
 	end
 })
 
@@ -542,21 +553,21 @@ field[value;Value;${value}]
 			local value = rmod.scriptblock.escape(meta:get_string("value"), info, last)
 		
 		if type(info) ~= "table" then
-			if type(info) == "string" then
+			--[[if type(info) == "string" then
 				local deserialized = minetest.deserialize(info)
 				if deserialized then info = deserialized else return info end
-			else
+			else]]
 				return info
-			end
+			--end
 		end
 		
 		-- We want to avoid problems like this:
 		-- serialize({nest = serialize({table})) =/= serialize({nest = {table}})
 		-- so we automatically deserialize the value if it can be deserialized.
-		if type(value) == "string" then
+		--[[if type(value) == "string" then
 			local deserialized = minetest.deserialize(value)
 			if deserialized then value = deserialized end
-		end
+		end]]
 		
 		info[propname] = value
 		
@@ -589,12 +600,12 @@ field[propname;Attribute Name;${propname}]
 			local propname = rmod.scriptblock.escape(meta:get_string("propname"), info, last)
 		
 		if type(info) ~= "table" then
-			if type(info) == "string" then
+			--[[if type(info) == "string" then
 				local deserialized = minetest.deserialize(info)
 				if deserialized then info = deserialized else return info end
-			else
+			else]]
 				return info
-			end
+			--end
 		end
 		
 		return info[propname]
@@ -651,7 +662,7 @@ field[digichannel;Digiline channel;${digichannel}]
 			if msgchannel ~= digichannel then debug("WRONG CHANNEL"); return end
 			
 			debug("ACTIVATED")
-			table.insert(queue, {pos, pos, minetest.serialize(msg) or msg or "", "", progchannel or ""})
+			table.insert(queue, {pos, pos, msg or "", "", progchannel or ""})
 		end,
 	}}
 })
