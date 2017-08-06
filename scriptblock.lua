@@ -12,7 +12,7 @@
 
 local program_channel = "Program channel"
 
-local do_debug = true
+local do_debug = false
 local function debug(text)
 	if do_debug then minetest.chat_send_all("[SB] " .. text) end
 end
