@@ -64,3 +64,11 @@ The grey blocks which look like three arrows that converge into one are guides -
 ### Player Detector
 
 The blue block with the simplified logo of a player avatar is the Player Detector. When it is ran, it updates @last to the previous @info and updates @info to the name of the nearest player.
+
+### Objects
+
+The bright cyan blocks (GET ATTRIBUTE OF OBJECT, SET ATTRIBUTE OF OBJECT, and NEW OBJECT) can be used to create complex objects, modify and get their attributes.
+
+### Digiline Receiver
+
+These are pastel blue equivalents to the Mesecon Detectors, and will trigger adjacent scriptblocks when a digiline message with the specified digiline channel is received. The information contained in the message is stored in @info, so that you can store it in a program variable. If the information is in the form of a table, you can modify it with the object blocks described earlier.

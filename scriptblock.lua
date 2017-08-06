@@ -10,7 +10,9 @@
 	end
 ]]
 
-local do_debug = false
+local program_channel = "Program channel"
+
+local do_debug = true
 local function debug(text)
 	if do_debug then minetest.chat_send_all("[SB] " .. text) end
 end
@@ -76,7 +78,9 @@ rmod.scriptblock.run = function (pos, sender, info, last, channel)
 	return local_queue
 end
 rmod.scriptblock.escape = function (text, info, last)
-	return text and text:gsub("@info", info):gsub("@last", last) or ""
+	if type(info) == "table" then info = minetest.serialize(info) or "" end
+	if type(last) == "table" then last = minetest.serialize(last) or "" end
+	return text and text:gsub("@info", info or ""):gsub("@last", last or "") or ""
 end
 
 local time = 0
@@ -104,7 +108,7 @@ minetest.register_node("rmod:scriptblock_set", {
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", [[
-field[channel;Program channel (optional);${channel}]
+field[channel;]] .. program_channel .. [[ (optional);${channel}]
 field[varname;Varname;${varname}]
 field[value;Value;${value}]
 ]])
@@ -153,7 +157,7 @@ minetest.register_node("rmod:scriptblock_get", {
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", [[
-field[channel;Program channel (optional);${channel}]
+field[channel;]] .. program_channel .. [[ (optional);${channel}]
 field[varname;Varname;${varname}]
 ]])
 	end,
@@ -194,7 +198,7 @@ minetest.register_node("rmod:scriptblock_mesecon", {
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", [[
-field[channel;Program channel;${channel}]
+field[channel;]] .. program_channel .. [[;${channel}]
 ]])
 	end,
 	on_receive_fields = function(pos, formname, fields, sender)
@@ -303,6 +307,13 @@ field[b;B;${b}]
 		elseif dir.x == -1 then truth[4] = true; falsth[3] = true
 		elseif dir.z == 1 then truth[5] = true; falsth[6] = true
 		elseif dir.z == -1 then truth[6] = true; falsth[5] = true end
+		
+		if type(a) == "table" then
+			a = minetest.serialize(a) or a
+		end
+		if type(b) == "table" then
+			b = minetest.serialize(b) or b
+		end
 		
 		return unpack(a == b and {info, truth} or {info, falsth})
 	end
@@ -496,4 +507,142 @@ minetest.register_node("rmod:scriptblock_player_detector", {
 		
 		return nearest or ""
 	end
+})
+
+
+
+minetest.register_node("rmod:scriptblock_set_attribute", {
+	description = "Scriptblock: Set Attribute of Object",
+	tiles = {"rmod_scriptblock_set_attribute.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_string("formspec", [[
+field[propname;Attribute Name;${propname}]
+field[value;Value;${value}]
+]])
+	end,
+	on_receive_fields = function(pos, formname, fields, sender)
+		local name = sender:get_player_name()
+		if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
+			minetest.record_protection_violation(pos, name)
+			return
+		end
+		if (fields.propname) then
+			minetest.get_meta(pos):set_string("propname", fields.propname)
+		end
+		if (fields.value) then
+			minetest.get_meta(pos):set_string("value", fields.value)
+		end
+	end,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		local meta = minetest.get_meta(pos)
+			local propname = rmod.scriptblock.escape(meta:get_string("propname"), info, last)
+			local value = rmod.scriptblock.escape(meta:get_string("value"), info, last)
+		
+		if type(info) ~= "table" then
+			if type(info) == "string" then
+				local deserialized = minetest.deserialize(info)
+				if deserialized then info = deserialized else return info end
+			else
+				return info
+			end
+		end
+		info[propname] = value
+		
+		return info
+	end
+})
+minetest.register_node("rmod:scriptblock_get_attribute", {
+	description = "Scriptblock: Get Attribute of Object",
+	tiles = {"rmod_scriptblock_get_attribute.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_string("formspec", [[
+field[propname;Attribute Name;${propname}]
+]])
+	end,
+	on_receive_fields = function(pos, formname, fields, sender)
+		local name = sender:get_player_name()
+		if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
+			minetest.record_protection_violation(pos, name)
+			return
+		end
+		if (fields.propname) then
+			minetest.get_meta(pos):set_string("propname", fields.propname)
+		end
+	end,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		local meta = minetest.get_meta(pos)
+			local propname = rmod.scriptblock.escape(meta:get_string("propname"), info, last)
+		
+		if type(info) ~= "table" then
+			if type(info) == "string" then
+				local deserialized = minetest.deserialize(info)
+				if deserialized then info = deserialized else return info end
+			else
+				return info
+			end
+		end
+		
+		return info[propname]
+	end
+})
+minetest.register_node("rmod:scriptblock_new_object", {
+	description = "Scriptblock: New Object",
+	tiles = {"rmod_scriptblock_new_object.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		return {}
+	end
+})
+
+
+
+minetest.register_node("rmod:scriptblock_digiline", {
+	description = "Scriptblock: Digiline Receiver",
+	tiles = {"rmod_scriptblock_digiline.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_string("formspec", [[
+field[progchannel;]] .. program_channel .. [[;${progchannel}]
+field[digichannel;Digiline channel;${digichannel}]
+]])
+	end,
+	on_receive_fields = function(pos, formname, fields, sender)
+		local name = sender:get_player_name()
+		if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
+			minetest.record_protection_violation(pos, name)
+			return
+		end
+		if (fields.digichannel) then
+			minetest.get_meta(pos):set_string("digichannel", fields.digichannel)
+		end
+		if (fields.progchannel) then
+			minetest.get_meta(pos):set_string("progchannel", fields.progchannel)
+		end
+	end,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		return info
+	end,
+	digiline = {
+		receptor = {},
+		effector = {
+		action = function (pos, node, msgchannel, msg)
+			local meta = minetest.get_meta(pos)
+				local progchannel = meta:get_string("progchannel")
+				local digichannel = meta:get_string("digichannel")
+			
+			if msgchannel ~= digichannel then debug("WRONG CHANNEL"); return end
+			
+			debug("ACTIVATED")
+			table.insert(queue, {pos, pos, minetest.serialize(msg) or msg or "", "", progchannel or ""})
+		end,
+	}}
 })
