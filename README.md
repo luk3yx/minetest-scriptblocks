@@ -55,7 +55,7 @@ The teal "?" block will lend execution in one direction if the two input values 
 
 ### Print
 
-The purple blocks with a speech bubble on them will print the message specified inside to the chat.
+The purple blocks with a speech bubble on them will print the message specified inside to the chat. If the player name is left empty, the message is sent to everyone - otherwise, it is sent to that player.
 
 ### Guide
 
