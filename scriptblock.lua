@@ -549,6 +549,15 @@ field[value;Value;${value}]
 				return info
 			end
 		end
+		
+		-- We want to avoid problems like this:
+		-- serialize({nest = serialize({table})) =/= serialize({nest = {table}})
+		-- so we automatically deserialize the value if it can be deserialized.
+		if type(value) == "string" then
+			local deserialized = minetest.deserialize(value)
+			if deserialized then value = deserialized end
+		end
+		
 		info[propname] = value
 		
 		return info
