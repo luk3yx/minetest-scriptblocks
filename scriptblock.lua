@@ -81,8 +81,8 @@ end
 
 local time = 0
 minetest.register_globalstep(function (dtime)
-	time = time + dtime
-	if time > 0.05 then time = 0 else return end
+	-- time = time + dtime
+	-- if time > 0.05 then time = 0 else return end
 	
 	local new_queue = {}
 	for i,data in pairs(queue) do
@@ -228,7 +228,7 @@ minetest.register_node("rmod:scriptblock_print", {
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", [[
-field[player;Player;${player}]
+field[player;Player (optional);${player}]
 field[message;Message;${message}]
 ]])
 	end,
@@ -476,9 +476,9 @@ field[b;B;${b}]
 	end
 })
 
-minetest.register_node("rmod:scriptblock_nearest", {
-	description = "Scriptblock: Get Nearest Player",
-	tiles = {"rmod_scriptblock_nearest.png"},
+minetest.register_node("rmod:scriptblock_player_detector", {
+	description = "Scriptblock: Player Detector",
+	tiles = {"rmod_scriptblock_player_detector.png"},
 	groups = {oddly_breakable_by_hand = 1},
 	use_texture_alpha = true,
 	scriptblock = function (pos, node, sender, info, last, main_channel)

@@ -60,3 +60,7 @@ The purple blocks with a speech bubble on them will print the message specified 
 ### Guide
 
 The grey blocks which look like three arrows that converge into one are guides - they are used to aid looping by funnelling all execution in one direction - never will a guide execute nearby blocks other than the one it is pointing to.
+
+### Player Detector
+
+The blue block with the simplified logo of a player avatar is the Player Detector. When it is ran, it updates @last to the previous @info and updates @info to the name of the nearest player.
