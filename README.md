@@ -45,7 +45,7 @@ When the Mesecon Receiver scriptblock (which is yellow with an exclamation mark 
 
 You can store data in these scripts with the SET (looks like :=) and GET (looks like []) blocks. Each script can keep track of up to two values during execution (@info and @last), and the GET block will update @last to the previous @info, while updating @info to the value of the chosen variable. All scriptblock inputs may have "@info" or "@last" written inside them, which will be substituted for the corresponding values at runtime.
 
-@last usually updates to the previous @info when @info gets changed, however there are exceptions for when the change is small (e.g. SET ATTRIBUTE OF OBJECT and the NOT gate), and exceptions in the OTHER direction where @last is updated anyway, such as in mathematical operations.
+When data is pushed to @info, @last is updated to the previous @info. In this manner, the system is like a stack with extremely low memory - it will only store the two most recent items of the stack.
 
 ### Program channels
 

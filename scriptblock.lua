@@ -1,5 +1,4 @@
 --[[
-	SUPER COMPLICATED STACK-BASED SYSTEM!
 	scriptblock = function (pos, node, sender, info, last, main_channel)
 		-- "pos" and "node" are the position and the node information of the scriptblock being ran.
 		-- "sender" would be the position of the node responsible for activating it.
@@ -7,9 +6,7 @@
 		-- "last" is the information that "info" /was/ before it was last changed.
 		-- "channel" is the channel in which variables are stored.
 		blah blah blah
-		return new_info, faces, flag, flag2  -- Information to pass to the next node(s), and information on which adjacent spaces we should even try to signal to.
-		-- When flag is set, @last isn't updated to the prev. @info even if @info is modified.
-		-- When flag2 is set, @last is updated to the prev. @info even if @info isn't modified.
+		return new_info, faces  -- Information to pass to the next node(s), and information on which adjacent spaces we should even try to signal to.
 	end
 ]]
 
@@ -72,10 +69,7 @@ rmod.scriptblock.run = function (pos, sender, info, last, channel)
 	
 	-- If the block is a script block...
 	if def and def.scriptblock then
-		-- The flag tells the code NOT to update @last, even if there is a change in @info.
-		-- Flag2 forces the code TO update @last, even if there is NO change in @info. It overrides flag, so use with care.
-			-- Flag2 is used in blocks that calculate results from more than one parameter, especially when the result might accidentally equal @info.
-		local new_info, faces, flag, flag2 = def.scriptblock(pos, node, sender, info, last, channel)
+		local new_info, faces = def.scriptblock(pos, node, sender, info, last, channel)
 		-- if new_info == rmod.scriptblock.stop_signal then return end  -- Looks like the block doesn't want to conduct.
 		if not faces then
 			faces = {true, true, true, true, true, true}
@@ -102,10 +96,11 @@ rmod.scriptblock.run = function (pos, sender, info, last, channel)
 			
 					if new_def and new_def.scriptblock then
 						local new_last
-						if (flag or (info == new_info)) and not flag2 then
-							new_last = last
+						if new_info ~= nil then  -- If something has been pushed to the stack, 
+							new_last = info  -- we update @last.
 						else
-							new_last = info
+							new_info = info  -- Why bother updating it?
+							new_last = last
 						end
 						table.insert(local_queue, {new_pos, pos, new_info, new_last, channel})
 					end
@@ -193,7 +188,7 @@ field[value;Value;${value}]
 		
 		debug("SET " .. channel .. "." .. tostring(varname) .. ": " .. tostring(value))
 		
-		return info
+		return
 	end
 })
 minetest.register_node("rmod:scriptblock_get", {
@@ -264,7 +259,7 @@ field[info;Starting @info;${info}]
 		end
 	end,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
-		return info
+		return
 	end,
 	mesecons = {effector = {
 		action_on = function (pos, node)
@@ -307,8 +302,8 @@ field[message;Message;${message}]
 			local plr = rmod.scriptblock.escape(meta:get_string("player"), info, last)
 			local msg = rmod.scriptblock.escape(meta:get_string("message"), info, last)
 		
-		if not plr then return info end
-		if not msg then return info end
+		if not plr then return end
+		if not msg then return end
 		
 		if type(msg) == "table" then msg = stringify(msg) end
 		
@@ -318,7 +313,7 @@ field[message;Message;${message}]
 			minetest.chat_send_player(plr, "Scriptblock -> you: " .. tostring(msg))
 		end
 		
-		return info
+		return
 	end
 })
 minetest.register_node("rmod:scriptblock_if", {
@@ -355,9 +350,9 @@ minetest.register_node("rmod:scriptblock_if", {
 		end]]
 		
 		if a == "" and b == "" then
-			return unpack(info and {info, truth} or {info, falsth})
+			return unpack(info and {nil, truth} or {nil, falsth})
 		else
-			return unpack(compare(a, b) and {info, truth} or {info, falsth})
+			return unpack(compare(a, b) and {nil, truth} or {nil, falsth})
 		end
 	end
 })
@@ -381,7 +376,7 @@ minetest.register_node("rmod:scriptblock_guide", {
 		elseif dir.z == 1 then guide[5] = true
 		elseif dir.z == -1 then guide[6] = true end
 		
-		return info, guide
+		return nil, guide
 	end
 })
 
@@ -418,7 +413,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return (tonumber(a) or 0) + (tonumber(b) or 0), nil, nil, true
+		return (tonumber(a) or 0) + (tonumber(b) or 0)
 	end
 })
 minetest.register_node("rmod:scriptblock_subtract", {
@@ -454,7 +449,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return (tonumber(a) or 0) - (tonumber(b) or 0), nil, nil, true
+		return (tonumber(a) or 0) - (tonumber(b) or 0)
 	end
 })
 minetest.register_node("rmod:scriptblock_multiply", {
@@ -490,7 +485,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return (tonumber(a) or 0) * (tonumber(b) or 0), nil, nil, true
+		return (tonumber(a) or 0) * (tonumber(b) or 0)
 	end
 })
 minetest.register_node("rmod:scriptblock_divide", {
@@ -526,7 +521,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return (tonumber(a) or 0) / (tonumber(b) or 0), nil, nil, true
+		return (tonumber(a) or 0) / (tonumber(b) or 0)
 	end
 })
 minetest.register_node("rmod:scriptblock_modulo", {
@@ -562,7 +557,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return (tonumber(a) or 0) % (tonumber(b) or 0), nil, nil, true
+		return (tonumber(a) or 0) % (tonumber(b) or 0)
 	end
 })
 
@@ -625,9 +620,9 @@ field[value;Value;${value}]
 		if type(info) ~= "table" then
 			--[[if type(info) == "string" then
 				local deserialized = minetest.deserialize(info)
-				if deserialized then info = deserialized else return info end
+				if deserialized then info = deserialized else return end
 			else]]
-				return info
+				return
 			--end
 		end
 		
@@ -641,7 +636,7 @@ field[value;Value;${value}]
 		
 		info[propname] = value
 		
-		return info, nil, true  -- Flag to avoid losing @last.
+		return info
 	end
 })
 minetest.register_node("rmod:scriptblock_get_attribute", {
@@ -674,9 +669,9 @@ field[propname;Attribute Name;${propname}]
 		if type(info) ~= "table" then
 			--[[if type(info) == "string" then
 				local deserialized = minetest.deserialize(info)
-				if deserialized then info = deserialized else return info end
+				if deserialized then info = deserialized else return end
 			else]]
-				return info
+				return
 			--end
 		end
 		
@@ -721,7 +716,7 @@ field[digichannel;Digiline channel;${digichannel}]
 		end
 	end,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
-		return info
+		return
 	end,
 	digiline = {
 		receptor = {},
@@ -745,7 +740,7 @@ minetest.register_node("rmod:scriptblock_not", {
 	groups = {oddly_breakable_by_hand = 1},
 	use_texture_alpha = true,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
-		return not info, nil, true
+		return not info
 	end,
 })
 minetest.register_node("rmod:scriptblock_and", {
@@ -754,7 +749,7 @@ minetest.register_node("rmod:scriptblock_and", {
 	groups = {oddly_breakable_by_hand = 1},
 	use_texture_alpha = true,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
-		return info and last, nil, nil, true
+		return info and last
 	end,
 })
 minetest.register_node("rmod:scriptblock_or", {
@@ -763,7 +758,7 @@ minetest.register_node("rmod:scriptblock_or", {
 	groups = {oddly_breakable_by_hand = 1},
 	use_texture_alpha = true,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
-		return info or last, nil, nil, true
+		return info or last
 	end,
 })
 
@@ -797,7 +792,7 @@ field[b;B;${b}]
 			local a = rmod.scriptblock.escape(meta:get_string("a"), info, last)
 			local b = rmod.scriptblock.escape(meta:get_string("b"), info, last)
 		
-		return compare(a, b), nil, nil, true
+		return compare(a, b)
 	end,
 })
 minetest.register_node("rmod:scriptblock_lt", {
@@ -830,7 +825,7 @@ field[b;B;${b}]
 			local a = rmod.scriptblock.escape(meta:get_string("a"), info, last)
 			local b = rmod.scriptblock.escape(meta:get_string("b"), info, last)
 		
-		return (tonumber(a) or 0) < (tonumber(b) or 0), nil, nil, true
+		return (tonumber(a) or 0) < (tonumber(b) or 0)
 	end,
 })
 minetest.register_node("rmod:scriptblock_gt", {
@@ -863,7 +858,7 @@ field[b;B;${b}]
 			local a = rmod.scriptblock.escape(meta:get_string("a"), info, last)
 			local b = rmod.scriptblock.escape(meta:get_string("b"), info, last)
 		
-		return (tonumber(a) or 0) > (tonumber(b) or 0), nil, nil, true
+		return (tonumber(a) or 0) > (tonumber(b) or 0)
 	end,
 })
 
@@ -875,7 +870,7 @@ minetest.register_node("rmod:scriptblock_type", {
 	groups = {oddly_breakable_by_hand = 1},
 	use_texture_alpha = true,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
-		return type(info) == "table" and "object" or type(info), nil, nil, true
+		return type(info) == "table" and "object" or type(info)
 	end,
 })
 minetest.register_node("rmod:scriptblock_number", {
@@ -903,7 +898,7 @@ field[number;Number literal;${number}]
 		local meta = minetest.get_meta(pos)
 			local number = meta:get_string("number")
 		
-		return tonumber(number), nil, nil, true
+		return tonumber(number)
 	end,
 })
 minetest.register_node("rmod:scriptblock_string", {
@@ -931,7 +926,7 @@ field[str;String literal;${str}]
 		local meta = minetest.get_meta(pos)
 			local str = meta:get_string("str")
 		
-		return str, nil, nil, true
+		return str
 	end,
 })
 
@@ -958,12 +953,12 @@ field[channel;Digiline channel;${channel}]
 		end
 	end,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
-		if not digiline then return info end
+		if not digiline then return end
 		local meta = minetest.get_meta(pos)
 			local channel = meta:get_string("channel")
 		
 		digiline:receptor_send(pos, digiline.rules.default, channel, info)
-		return info
+		return
 	end,
 	digiline = {
 		receptor = {},
