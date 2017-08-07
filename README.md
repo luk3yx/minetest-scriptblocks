@@ -33,6 +33,10 @@ Digigrates can be adjusted by sending messages - they include "on", "off", "togg
 
 Scriptblocks are blocks that you can use for creating simple programs. They are one of the most complicated parts of this mod, which can be a good thing or a bad thing depending on your viewpoint.
 
+### An important note
+
+Scriptblocks can handle values of various types, such as objects (tables), strings, numbers and booleans. Recent changes mean that scriptblocks no longer convert between them when it is unnecessary. As a result, attempting to compare the equality of, say, a boolean with the string "true" will result in false, because a boolean is not a string. Please keep this in mind as you program with scriptblocks, to avoid messy coding (building? :P) and frustration.
+
 ### Basics
 
 When the Mesecon Detector scriptblock (which is yellow with an exclamation mark on it) receives mesecon power, it triggers any scriptblocks adjacent to it. Each scriptblock will then trigger each scriptblock adjacent to itself (excluding the one that triggered it in the first place).
@@ -40,6 +44,8 @@ When the Mesecon Detector scriptblock (which is yellow with an exclamation mark 
 ### Variables
 
 You can store data in these scripts with the SET (looks like :=) and GET (looks like []) blocks. Each script can keep track of up to two values during execution (@info and @last), and the GET block will update @last to the previous @info, while updating @info to the value of the chosen variable. All scriptblock inputs may have "@info" or "@last" written inside them, which will be substituted for the corresponding values at runtime.
+
+@last usually updates to the previous @info when @info gets changed, however there are exceptions for when the change is small (e.g. SET ATTRIBUTE OF OBJECT and the upcoming NOT) - this change probably broke any scripts larger than a few blocks, but I think it's a positive change in the long run.
 
 ### Program channels
 
@@ -49,9 +55,15 @@ Program channels are channels you can set to avoid clashing with other programs 
 
 The mathematical operators (add, subtract, multiply, divide) work in much the same way as GET - they update @last to the previous @info, and update @info to the result of the calculation. To add two values together, you would do (or rather, build) something along the lines of "GET a; GET b; ADD @last @info; SET c @info;", which will set c to the sum of a and b.
 
+### Booleans
+
+There are comparison operators which will return true or false depending on whether their condition is true. For example, a "LESS THAN" block with A = 3 and B = 2 will return false, while one with A = 1 instead will return true. Booleans themselves can be manipulated with NOT (turns false into true and vice versa), AND (only true if both operands are true) and OR (only false if both operands are false).
+
+Note that in the case of AND and OR, the two operands are taken to be @info and @last respectively, since they are expected to be booleans - and being able to input "true" or "false" directly into one doesn't make sense to me (what's the point of "true OR x" or "false AND y"?).
+
 ### Conditional
 
-The teal "?" block will lend execution in one direction if the two input values are equal, and the other if they are not equal.
+The teal "?" block will lend execution towards the green side if the value reaching it (@info) is non-nil, and non-false. If it /is/ nil or false, execution is lent towards the red side instead. Formerly this took two operands and compared them, but that functionality has been replaced by the comparison operators described above.
 
 ### Print
 

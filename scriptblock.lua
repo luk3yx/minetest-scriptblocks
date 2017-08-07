@@ -29,6 +29,7 @@ local function set_storage(data)
 end
 
 local function stringify(t)
+	if type(t) ~= "table" then return tostring(t) end
 	return minetest.serialize(t):sub(("return "):len()+1, -1)
 end
 
@@ -62,7 +63,8 @@ rmod.scriptblock.run = function (pos, sender, info, last, channel)
 	
 	-- If the block is a script block...
 	if def and def.scriptblock then
-		local new_info, faces = def.scriptblock(pos, node, sender, info, last, channel)
+		-- The flag tells the code NOT to update @last, even if there is a change in @info.
+		local new_info, faces, flag = def.scriptblock(pos, node, sender, info, last, channel)
 		-- if new_info == rmod.scriptblock.stop_signal then return end  -- Looks like the block doesn't want to conduct.
 		if not faces then
 			faces = {true, true, true, true, true, true}
@@ -88,7 +90,13 @@ rmod.scriptblock.run = function (pos, sender, info, last, channel)
 							local new_def = minetest.registered_nodes[new_name]
 			
 					if new_def and new_def.scriptblock then
-						table.insert(local_queue, {new_pos, pos, new_info, info == new_info and last or info, channel})
+						local new_last
+						if flag or info == new_info then
+							new_last = last
+						else
+							new_last = info
+						end
+						table.insert(local_queue, {new_pos, pos, new_info, new_last, channel})
 					end
 				end
 			end
@@ -103,7 +111,7 @@ rmod.scriptblock.escape = function (text, info, last)
 	
 	if type(info) == "table" then info = stringify(info) or "" end
 	if type(last) == "table" then last = stringify(last) or "" end
-	return text and text:gsub("@info", info or ""):gsub("@last", last or "") or ""
+	return text and text:gsub("@info", tostring(info) or ""):gsub("@last", tostring(last) or "")-- or ""
 end
 
 local time = 0
@@ -162,6 +170,8 @@ field[value;Value;${value}]
 		
 		if channel == "" or not channel then channel = main_channel end
 		
+		if not varname then varname = "" end
+		
 		if not store[channel] then store[channel] = {} end
 		store[channel][varname] = value
 
@@ -205,12 +215,13 @@ field[varname;Varname;${varname}]
 		local store = get_storage()
 		
 		if channel == "" or not channel then channel = main_channel end
+		if not varname then return end
 		
 		if not store[channel] then store[channel] = {} end
 		
 		debug("GET " .. tostring(channel) .. "." .. tostring(varname) .. ": " .. tostring(store[channel][varname] or ""))
 		
-		return store[channel][varname] or ""
+		return store[channel][varname]
 	end
 })
 minetest.register_node("rmod:scriptblock_mesecon", {
@@ -222,6 +233,7 @@ minetest.register_node("rmod:scriptblock_mesecon", {
 		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", [[
 field[channel;]] .. program_channel .. [[;${channel}]
+field[info;Starting @info;${info}]
 ]])
 	end,
 	on_receive_fields = function(pos, formname, fields, sender)
@@ -233,6 +245,9 @@ field[channel;]] .. program_channel .. [[;${channel}]
 		if (fields.channel) then
 			minetest.get_meta(pos):set_string("channel", fields.channel)
 		end
+		if (fields.info) then
+			minetest.get_meta(pos):set_string("info", fields.info)
+		end
 	end,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
 		return info
@@ -240,10 +255,11 @@ field[channel;]] .. program_channel .. [[;${channel}]
 	mesecons = {effector = {
 		action_on = function (pos, node)
 			local meta = minetest.get_meta(pos)
-			local channel = meta:get_string("channel")
+				local channel = meta:get_string("channel")
+				local info = meta:get_string("info")
 			
 			debug("ACTIVATED")
-			table.insert(queue, {pos, pos, "", "", channel or ""})
+			table.insert(queue, {pos, pos, info or "", "", channel or ""})
 		end,
 	}}
 })
@@ -277,6 +293,9 @@ field[message;Message;${message}]
 			local plr = rmod.scriptblock.escape(meta:get_string("player"), info, last)
 			local msg = rmod.scriptblock.escape(meta:get_string("message"), info, last)
 		
+		if not plr then return info end
+		if not msg then return info end
+		
 		if type(msg) == "table" then msg = stringify(msg) end
 		
 		if plr == "" then
@@ -289,34 +308,15 @@ field[message;Message;${message}]
 	end
 })
 minetest.register_node("rmod:scriptblock_if", {
-	description = "Scriptblock: If Equals",
+	description = "Scriptblock: If",
 	tiles = {"rmod_scriptblock_if_top.png", "rmod_scriptblock_if_bottom.png",
 		"rmod_scriptblock_if_right.png", "rmod_scriptblock_if_left.png",
 		"rmod_scriptblock_if_truth.png", "rmod_scriptblock_if_falsth.png"},
 	groups = {oddly_breakable_by_hand = 1},
 	use_texture_alpha = true,
 	paramtype2 = "facedir",
-	on_construct = function(pos)
-		local meta = minetest.get_meta(pos)
-		meta:set_string("formspec", [[
-field[a;A;${a}]
-field[b;B;${b}]
-]])
-	end,
-	on_receive_fields = function(pos, formname, fields, sender)
-		local name = sender:get_player_name()
-		if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-			minetest.record_protection_violation(pos, name)
-			return
-		end
-		if (fields.a) then
-			minetest.get_meta(pos):set_string("a", fields.a)
-		end
-		if (fields.b) then
-			minetest.get_meta(pos):set_string("b", fields.b)
-		end
-	end,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
+		-- compatibility for back when this was "IF EQUALS"
 		local meta = minetest.get_meta(pos)
 			local a = rmod.scriptblock.escape(meta:get_string("a"), info, last)
 			local b = rmod.scriptblock.escape(meta:get_string("b"), info, last)
@@ -340,7 +340,11 @@ field[b;B;${b}]
 			b = stringify(b) or b
 		end]]
 		
-		return unpack(compare(a, b) and {info, truth} or {info, falsth})
+		if a == "" and b == "" then
+			return unpack(info and {info, truth} or {info, falsth})
+		else
+			return unpack(compare(a, b) and {info, truth} or {info, falsth})
+		end
 	end
 })
 minetest.register_node("rmod:scriptblock_guide", {
@@ -566,6 +570,8 @@ field[value;Value;${value}]
 			local propname = rmod.scriptblock.escape(meta:get_string("propname"), info, last)
 			local value = rmod.scriptblock.escape(meta:get_string("value"), info, last)
 		
+		if not propname then return end
+		
 		if type(info) ~= "table" then
 			--[[if type(info) == "string" then
 				local deserialized = minetest.deserialize(info)
@@ -585,7 +591,7 @@ field[value;Value;${value}]
 		
 		info[propname] = value
 		
-		return info
+		return info, nil, true  -- Flag to avoid losing @last.
 	end
 })
 minetest.register_node("rmod:scriptblock_get_attribute", {
@@ -612,6 +618,8 @@ field[propname;Attribute Name;${propname}]
 	scriptblock = function (pos, node, sender, info, last, main_channel)
 		local meta = minetest.get_meta(pos)
 			local propname = rmod.scriptblock.escape(meta:get_string("propname"), info, last)
+		
+		if not propname then return end
 		
 		if type(info) ~= "table" then
 			--[[if type(info) == "string" then
@@ -679,4 +687,132 @@ field[digichannel;Digiline channel;${digichannel}]
 			table.insert(queue, {pos, pos, msg or "", "", progchannel or ""})
 		end,
 	}}
+})
+
+minetest.register_node("rmod:scriptblock_not", {
+	description = "Scriptblock: Not Gate",
+	tiles = {"rmod_scriptblock_not.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		return not info
+	end,
+})
+minetest.register_node("rmod:scriptblock_and", {
+	description = "Scriptblock: And Gate",
+	tiles = {"rmod_scriptblock_and.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		return info and last
+	end,
+})
+minetest.register_node("rmod:scriptblock_or", {
+	description = "Scriptblock: Or Gate",
+	tiles = {"rmod_scriptblock_or.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		return info or last
+	end,
+})
+
+minetest.register_node("rmod:scriptblock_equals", {
+	description = "Scriptblock: Equals",
+	tiles = {"rmod_scriptblock_equals.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_string("formspec", [[
+field[a;A;${a}]
+field[b;B;${b}]
+]])
+	end,
+	on_receive_fields = function(pos, formname, fields, sender)
+		local name = sender:get_player_name()
+		if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
+			minetest.record_protection_violation(pos, name)
+			return
+		end
+		if (fields.a) then
+			minetest.get_meta(pos):set_string("a", fields.a)
+		end
+		if (fields.b) then
+			minetest.get_meta(pos):set_string("b", fields.b)
+		end
+	end,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		local meta = minetest.get_meta(pos)
+			local a = rmod.scriptblock.escape(meta:get_string("a"), info, last)
+			local b = rmod.scriptblock.escape(meta:get_string("b"), info, last)
+		
+		return compare(a, b)
+	end,
+})
+minetest.register_node("rmod:scriptblock_lt", {
+	description = "Scriptblock: Less than",
+	tiles = {"rmod_scriptblock_lt.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_string("formspec", [[
+field[a;A;${a}]
+field[b;B;${b}]
+]])
+	end,
+	on_receive_fields = function(pos, formname, fields, sender)
+		local name = sender:get_player_name()
+		if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
+			minetest.record_protection_violation(pos, name)
+			return
+		end
+		if (fields.a) then
+			minetest.get_meta(pos):set_string("a", fields.a)
+		end
+		if (fields.b) then
+			minetest.get_meta(pos):set_string("b", fields.b)
+		end
+	end,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		local meta = minetest.get_meta(pos)
+			local a = rmod.scriptblock.escape(meta:get_string("a"), info, last)
+			local b = rmod.scriptblock.escape(meta:get_string("b"), info, last)
+		
+		return (tonumber(a) or 0) < (tonumber(b) or 0)
+	end,
+})
+minetest.register_node("rmod:scriptblock_gt", {
+	description = "Scriptblock: Greater than",
+	tiles = {"rmod_scriptblock_gt.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_string("formspec", [[
+field[a;A;${a}]
+field[b;B;${b}]
+]])
+	end,
+	on_receive_fields = function(pos, formname, fields, sender)
+		local name = sender:get_player_name()
+		if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
+			minetest.record_protection_violation(pos, name)
+			return
+		end
+		if (fields.a) then
+			minetest.get_meta(pos):set_string("a", fields.a)
+		end
+		if (fields.b) then
+			minetest.get_meta(pos):set_string("b", fields.b)
+		end
+	end,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		local meta = minetest.get_meta(pos)
+			local a = rmod.scriptblock.escape(meta:get_string("a"), info, last)
+			local b = rmod.scriptblock.escape(meta:get_string("b"), info, last)
+		
+		return (tonumber(a) or 0) > (tonumber(b) or 0)
+	end,
 })
