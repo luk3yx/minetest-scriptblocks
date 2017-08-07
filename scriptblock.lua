@@ -962,6 +962,7 @@ field[channel;Digiline channel;${channel}]
 	end,
 	digiline = {
 		receptor = {},
-		effector = {}
+		effector = {action = function (pos, node, msgchannel, msg)
+		end,}
 	}
 })
