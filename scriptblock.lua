@@ -1,4 +1,5 @@
 --[[
+	SUPER COMPLICATED STACK-BASED SYSTEM!
 	scriptblock = function (pos, node, sender, info, last, main_channel)
 		-- "pos" and "node" are the position and the node information of the scriptblock being ran.
 		-- "sender" would be the position of the node responsible for activating it.
@@ -6,8 +7,9 @@
 		-- "last" is the information that "info" /was/ before it was last changed.
 		-- "channel" is the channel in which variables are stored.
 		blah blah blah
-		return new_info, faces, flag  -- Information to pass to the next node(s), and information on which adjacent spaces we should even try to signal to.
+		return new_info, faces, flag, flag2  -- Information to pass to the next node(s), and information on which adjacent spaces we should even try to signal to.
 		-- When flag is set, @last isn't updated to the prev. @info even if @info is modified.
+		-- When flag2 is set, @last is updated to the prev. @info even if @info isn't modified.
 	end
 ]]
 
@@ -71,7 +73,9 @@ rmod.scriptblock.run = function (pos, sender, info, last, channel)
 	-- If the block is a script block...
 	if def and def.scriptblock then
 		-- The flag tells the code NOT to update @last, even if there is a change in @info.
-		local new_info, faces, flag = def.scriptblock(pos, node, sender, info, last, channel)
+		-- Flag2 forces the code TO update @last, even if there is NO change in @info. It overrides flag, so use with care.
+			-- Flag2 is used in blocks that calculate results from more than one parameter, especially when the result might accidentally equal @info.
+		local new_info, faces, flag, flag2 = def.scriptblock(pos, node, sender, info, last, channel)
 		-- if new_info == rmod.scriptblock.stop_signal then return end  -- Looks like the block doesn't want to conduct.
 		if not faces then
 			faces = {true, true, true, true, true, true}
@@ -98,7 +102,7 @@ rmod.scriptblock.run = function (pos, sender, info, last, channel)
 			
 					if new_def and new_def.scriptblock then
 						local new_last
-						if flag or info == new_info then
+						if (flag or (info == new_info)) and not flag2 then
 							new_last = last
 						else
 							new_last = info
@@ -113,6 +117,9 @@ rmod.scriptblock.run = function (pos, sender, info, last, channel)
 end
 rmod.scriptblock.escape = function (text, info, last)
 	-- We handle these separately, so that we don't need to stringify it.
+	local info = info
+	local last = last
+	
 	if text == "@info" then return info end
 	if text == "@last" then return last end
 	
@@ -411,7 +418,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return (tonumber(a) or 0) + (tonumber(b) or 0)
+		return (tonumber(a) or 0) + (tonumber(b) or 0), nil, nil, true
 	end
 })
 minetest.register_node("rmod:scriptblock_subtract", {
@@ -447,7 +454,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return (tonumber(a) or 0) - (tonumber(b) or 0)
+		return (tonumber(a) or 0) - (tonumber(b) or 0), nil, nil, true
 	end
 })
 minetest.register_node("rmod:scriptblock_multiply", {
@@ -483,7 +490,7 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return (tonumber(a) or 0) * (tonumber(b) or 0)
+		return (tonumber(a) or 0) * (tonumber(b) or 0), nil, nil, true
 	end
 })
 minetest.register_node("rmod:scriptblock_divide", {
@@ -519,7 +526,43 @@ field[b;B;${b}]
 		local facedir = node.param2
 			local dir = minetest.facedir_to_dir(facedir)
 		
-		return (tonumber(a) or 0) / (tonumber(b) or 0)
+		return (tonumber(a) or 0) / (tonumber(b) or 0), nil, nil, true
+	end
+})
+minetest.register_node("rmod:scriptblock_modulo", {
+	description = "Scriptblock: Modulo",
+	tiles = {"rmod_scriptblock_modulo.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_string("formspec", [[
+field[a;A;${a}]
+field[b;B;${b}]
+]])
+	end,
+	on_receive_fields = function(pos, formname, fields, sender)
+		local name = sender:get_player_name()
+		if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
+			minetest.record_protection_violation(pos, name)
+			return
+		end
+		if (fields.a) then
+			minetest.get_meta(pos):set_string("a", fields.a)
+		end
+		if (fields.b) then
+			minetest.get_meta(pos):set_string("b", fields.b)
+		end
+	end,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		local meta = minetest.get_meta(pos)
+			local a = rmod.scriptblock.escape(meta:get_string("a"), info, last)
+			local b = rmod.scriptblock.escape(meta:get_string("b"), info, last)
+		
+		local facedir = node.param2
+			local dir = minetest.facedir_to_dir(facedir)
+		
+		return (tonumber(a) or 0) % (tonumber(b) or 0), nil, nil, true
 	end
 })
 
@@ -711,7 +754,7 @@ minetest.register_node("rmod:scriptblock_and", {
 	groups = {oddly_breakable_by_hand = 1},
 	use_texture_alpha = true,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
-		return info and last
+		return info and last, nil, nil, true
 	end,
 })
 minetest.register_node("rmod:scriptblock_or", {
@@ -720,7 +763,7 @@ minetest.register_node("rmod:scriptblock_or", {
 	groups = {oddly_breakable_by_hand = 1},
 	use_texture_alpha = true,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
-		return info or last
+		return info or last, nil, nil, true
 	end,
 })
 
@@ -754,7 +797,7 @@ field[b;B;${b}]
 			local a = rmod.scriptblock.escape(meta:get_string("a"), info, last)
 			local b = rmod.scriptblock.escape(meta:get_string("b"), info, last)
 		
-		return compare(a, b)
+		return compare(a, b), nil, nil, true
 	end,
 })
 minetest.register_node("rmod:scriptblock_lt", {
@@ -787,7 +830,7 @@ field[b;B;${b}]
 			local a = rmod.scriptblock.escape(meta:get_string("a"), info, last)
 			local b = rmod.scriptblock.escape(meta:get_string("b"), info, last)
 		
-		return (tonumber(a) or 0) < (tonumber(b) or 0)
+		return (tonumber(a) or 0) < (tonumber(b) or 0), nil, nil, true
 	end,
 })
 minetest.register_node("rmod:scriptblock_gt", {
@@ -820,10 +863,77 @@ field[b;B;${b}]
 			local a = rmod.scriptblock.escape(meta:get_string("a"), info, last)
 			local b = rmod.scriptblock.escape(meta:get_string("b"), info, last)
 		
-		return (tonumber(a) or 0) > (tonumber(b) or 0)
+		return (tonumber(a) or 0) > (tonumber(b) or 0), nil, nil, true
 	end,
 })
 
+
+
+minetest.register_node("rmod:scriptblock_type", {
+	description = "Scriptblock: Get Type",
+	tiles = {"rmod_scriptblock_type.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		return type(info) == "table" and "object" or type(info), nil, nil, true
+	end,
+})
+minetest.register_node("rmod:scriptblock_number", {
+	description = "Scriptblock: Number Literal",
+	tiles = {"rmod_scriptblock_number.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_string("formspec", [[
+field[number;Number literal;${number}]
+]])
+	end,
+	on_receive_fields = function(pos, formname, fields, sender)
+		local name = sender:get_player_name()
+		if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
+			minetest.record_protection_violation(pos, name)
+			return
+		end
+		if (fields.number) then
+			minetest.get_meta(pos):set_string("number", fields.number)
+		end
+	end,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		local meta = minetest.get_meta(pos)
+			local number = meta:get_string("number")
+		
+		return tonumber(number), nil, nil, true
+	end,
+})
+minetest.register_node("rmod:scriptblock_string", {
+	description = "Scriptblock: String Literal",
+	tiles = {"rmod_scriptblock_string.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_string("formspec", [[
+field[str;String literal;${str}]
+]])
+	end,
+	on_receive_fields = function(pos, formname, fields, sender)
+		local name = sender:get_player_name()
+		if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
+			minetest.record_protection_violation(pos, name)
+			return
+		end
+		if (fields.str) then
+			minetest.get_meta(pos):set_string("str", fields.str)
+		end
+	end,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		local meta = minetest.get_meta(pos)
+			local str = meta:get_string("str")
+		
+		return str, nil, nil, true
+	end,
+})
 
 
 minetest.register_node("rmod:scriptblock_digiline_sender", {

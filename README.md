@@ -45,15 +45,15 @@ When the Mesecon Receiver scriptblock (which is yellow with an exclamation mark 
 
 You can store data in these scripts with the SET (looks like :=) and GET (looks like []) blocks. Each script can keep track of up to two values during execution (@info and @last), and the GET block will update @last to the previous @info, while updating @info to the value of the chosen variable. All scriptblock inputs may have "@info" or "@last" written inside them, which will be substituted for the corresponding values at runtime.
 
-@last usually updates to the previous @info when @info gets changed, however there are exceptions for when the change is small (e.g. SET ATTRIBUTE OF OBJECT and the NOT gate).
+@last usually updates to the previous @info when @info gets changed, however there are exceptions for when the change is small (e.g. SET ATTRIBUTE OF OBJECT and the NOT gate), and exceptions in the OTHER direction where @last is updated anyway, such as in mathematical operations.
 
 ### Program channels
 
 Program channels are channels you can set to avoid clashing with other programs that may use similar or equal variable names. You can still set the variables of other channels by entering them into SET and GET variable blocks.
 
-### Mathematical operators
+### Mathematical operations
 
-The mathematical operators (add, subtract, multiply, divide) work in much the same way as GET - they update @last to the previous @info, and update @info to the result of the calculation. To add two values together, you would do (or rather, build) something along the lines of "GET a; GET b; ADD @last @info; SET c @info;", which will set c to the sum of a and b.
+The mathematical operations (add, subtract, multiply, divide) work in much the same way as GET - they update @last to the previous @info, and update @info to the result of the calculation. To add two values together, you would do (or rather, build) something along the lines of "GET a; GET b; ADD @last @info; SET c @info;", which will set c to the sum of a and b.
 
 ### Booleans
 
@@ -88,3 +88,7 @@ These are pastel blue equivalents to the Mesecon Detectors, and will trigger adj
 ### Digiline Sender
 
 These are the polar opposites of the Digiline Receivers - they will send the data contained in @info on the specified channel.
+
+### Type blocks
+
+The type blocks deal with the basic types of the system - strings, numbers, booleans, and tables (called objects in this mod). You can use the GET TYPE block to get the type of the current @info, and you can use the NUMBER LITERAL and STRING LITERAL blocks to set @info to a set value (even the string "@info" itself - the automatic substitution system isn't applied here).
