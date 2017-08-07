@@ -39,13 +39,13 @@ Scriptblocks can handle values of various types, such as objects (tables), strin
 
 ### Basics
 
-When the Mesecon Detector scriptblock (which is yellow with an exclamation mark on it) receives mesecon power, it triggers any scriptblocks adjacent to it. Each scriptblock will then trigger each scriptblock adjacent to itself (excluding the one that triggered it in the first place).
+When the Mesecon Receiver scriptblock (which is yellow with an exclamation mark on it) receives mesecon power, it triggers any scriptblocks adjacent to it. Each scriptblock will then trigger each scriptblock adjacent to itself (excluding the one that triggered it in the first place).
 
 ### Variables
 
 You can store data in these scripts with the SET (looks like :=) and GET (looks like []) blocks. Each script can keep track of up to two values during execution (@info and @last), and the GET block will update @last to the previous @info, while updating @info to the value of the chosen variable. All scriptblock inputs may have "@info" or "@last" written inside them, which will be substituted for the corresponding values at runtime.
 
-@last usually updates to the previous @info when @info gets changed, however there are exceptions for when the change is small (e.g. SET ATTRIBUTE OF OBJECT and the upcoming NOT) - this change probably broke any scripts larger than a few blocks, but I think it's a positive change in the long run.
+@last usually updates to the previous @info when @info gets changed, however there are exceptions for when the change is small (e.g. SET ATTRIBUTE OF OBJECT and the NOT gate).
 
 ### Program channels
 
@@ -84,3 +84,7 @@ The bright cyan blocks (GET ATTRIBUTE OF OBJECT, SET ATTRIBUTE OF OBJECT, and NE
 ### Digiline Receiver
 
 These are pastel blue equivalents to the Mesecon Detectors, and will trigger adjacent scriptblocks when a digiline message with the specified digiline channel is received. The information contained in the message is stored in @info, so that you can store it in a program variable. If the information is in the form of a table, you can modify it with the object blocks described earlier.
+
+### Digiline Sender
+
+These are the polar opposites of the Digiline Receivers - they will send the data contained in @info on the specified channel.

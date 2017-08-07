@@ -6,9 +6,16 @@
 		-- "last" is the information that "info" /was/ before it was last changed.
 		-- "channel" is the channel in which variables are stored.
 		blah blah blah
-		return new_info, faces  -- Information to pass to the next node(s), and information on which adjacent spaces we should even try to signal to.
+		return new_info, faces, flag  -- Information to pass to the next node(s), and information on which adjacent spaces we should even try to signal to.
+		-- When flag is set, @last isn't updated to the prev. @info even if @info is modified.
 	end
 ]]
+
+-- These are aliases registered to aid various transitions (mostly changes in the node naming scheme, though).
+minetest.register_alias("rmod:scriptblock_digiline", "rmod:scriptblock_digiline_receiver")
+minetest.register_alias("rmod:scriptblock_mesecon", "rmod:scriptblock_mesecon_receiver")
+
+
 
 local program_channel = "Program channel"
 
@@ -224,8 +231,8 @@ field[varname;Varname;${varname}]
 		return store[channel][varname]
 	end
 })
-minetest.register_node("rmod:scriptblock_mesecon", {
-	description = "Scriptblock: Mesecon Detector",
+minetest.register_node("rmod:scriptblock_mesecon_receiver", {
+	description = "Scriptblock: Mesecon Receiver",
 	tiles = {"rmod_scriptblock_mesecon.png"},
 	groups = {oddly_breakable_by_hand = 1},
 	use_texture_alpha = true,
@@ -645,7 +652,7 @@ minetest.register_node("rmod:scriptblock_new_object", {
 
 
 
-minetest.register_node("rmod:scriptblock_digiline", {
+minetest.register_node("rmod:scriptblock_digiline_receiver", {
 	description = "Scriptblock: Digiline Receiver",
 	tiles = {"rmod_scriptblock_digiline.png"},
 	groups = {oddly_breakable_by_hand = 1},
@@ -684,7 +691,7 @@ field[digichannel;Digiline channel;${digichannel}]
 			if msgchannel ~= digichannel then debug("WRONG CHANNEL"); return end
 			
 			debug("ACTIVATED")
-			table.insert(queue, {pos, pos, msg or "", "", progchannel or ""})
+			table.insert(queue, {pos, pos, msg, "", progchannel or ""})
 		end,
 	}}
 })
@@ -695,7 +702,7 @@ minetest.register_node("rmod:scriptblock_not", {
 	groups = {oddly_breakable_by_hand = 1},
 	use_texture_alpha = true,
 	scriptblock = function (pos, node, sender, info, last, main_channel)
-		return not info
+		return not info, nil, true
 	end,
 })
 minetest.register_node("rmod:scriptblock_and", {
@@ -815,4 +822,41 @@ field[b;B;${b}]
 		
 		return (tonumber(a) or 0) > (tonumber(b) or 0)
 	end,
+})
+
+
+
+minetest.register_node("rmod:scriptblock_digiline_sender", {
+	description = "Scriptblock: Digiline Sender",
+	tiles = {"rmod_scriptblock_digiline_sender.png"},
+	groups = {oddly_breakable_by_hand = 1},
+	use_texture_alpha = true,
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_string("formspec", [[
+field[channel;Digiline channel;${channel}]
+]])
+	end,
+	on_receive_fields = function(pos, formname, fields, sender)
+		local name = sender:get_player_name()
+		if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
+			minetest.record_protection_violation(pos, name)
+			return
+		end
+		if (fields.channel) then
+			minetest.get_meta(pos):set_string("channel", fields.channel)
+		end
+	end,
+	scriptblock = function (pos, node, sender, info, last, main_channel)
+		if not digiline then return info end
+		local meta = minetest.get_meta(pos)
+			local channel = meta:get_string("channel")
+		
+		digiline:receptor_send(pos, digiline.rules.default, channel, info)
+		return info
+	end,
+	digiline = {
+		receptor = {},
+		effector = {}
+	}
 })
