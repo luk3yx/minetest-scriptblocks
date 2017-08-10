@@ -5,11 +5,18 @@ minetest.register_node("rmod:mesegrate_off", {
 	use_texture_alpha = true,
 	--drawtype = "glasslike",
 	paramtype = "light",
-	mesecons = {effector = {
-		action_on = function (pos, node)
-			minetest.swap_node(pos, {name = "rmod:mesegrate_on", param2 = node.param2})
-		end,
-	}}
+	mesecons = {
+		conductor = {
+			-- rules = rules,
+			state = mesecon.state.off,
+			onstate = "rmod:mesegrate_on"
+		},		
+		effector = {
+			action_on = function (pos, node)
+				minetest.swap_node(pos, {name = "rmod:mesegrate_on", param2 = node.param2})
+			end,
+		}
+	}
 })
 
 minetest.register_node("rmod:mesegrate_on", {
@@ -19,10 +26,17 @@ minetest.register_node("rmod:mesegrate_on", {
 	use_texture_alpha = true,
 	drawtype = "glasslike",
 	paramtype = "light",
-	mesecons = {effector = {
-		action_off = function (pos, node)
-			minetest.swap_node(pos, {name = "rmod:mesegrate_off", param2 = node.param2})
-		end,
-	}},
+	mesecons = {
+		conductor = {
+			-- rules = rules,
+			state = mesecon.state.on,
+			offstate = "rmod:mesegrate_off"
+		},
+		effector = {
+			action_off = function (pos, node)
+				minetest.swap_node(pos, {name = "rmod:mesegrate_off", param2 = node.param2})
+			end,
+		}
+	},
 	drop = "rmod:mesegrate_off"
 })

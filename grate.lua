@@ -59,7 +59,7 @@ local function attempt_flow_to(pos1, pos2, dec)
 	elseif pos2.y > pos1.y then return end
 	
 	local new_level = level1 - dec
-	if gravity then new_level = 8 end
+	if gravity then new_level = 15 end
 	
 	-- When water flows normally, it slowly decreases as it spreads outwards.
 	-- Dec is the variable applied to the originating liquid's level, which
