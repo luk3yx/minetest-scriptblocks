@@ -136,6 +136,11 @@ minetest.register_globalstep(function (dtime)
 				table.insert(new_queue, new_item)
 			end
 		end
+		
+		if i > 12 then
+			queue = new_queue
+			return
+		end
 	end
 	queue = new_queue
 end)
