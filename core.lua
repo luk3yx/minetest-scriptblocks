@@ -189,7 +189,12 @@ end
 
 -- Easily add items to the queue
 scriptblocks.queue = function(pos, sender, info, last, channel)
-    table.insert(queue, {pos, sender, info, last, channel})
+    if channel == '' then channel = false end
+    
+    table.insert(queue, {
+        pos, sender, info, last,
+        channel or ('the server:' .. minetest.pos_to_string(pos))
+    })
     
     if not queue_lock then
         -- Start the queue handler

@@ -31,7 +31,7 @@ field[digichannel;Digiline channel;${digichannel}]
             
             if msgchannel ~= digichannel then return end
             
-            scriptblocks.queue(pos, pos, msg, '', progchannel or '')
+            scriptblocks.queue(pos, pos, msg, '', progchannel)
         end,
     }}
 })

@@ -27,7 +27,7 @@ field[info;Starting @info;${info}]
                 local channel = meta:get_string('channel')
                 local info = meta:get_string('info')
             
-            scriptblocks.queue(pos, pos, info or '', '', channel or '')
+            scriptblocks.queue(pos, pos, info or '', '', channel)
         end,
     }}
 })
