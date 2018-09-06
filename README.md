@@ -13,8 +13,8 @@ will be "cut off" by the new anti-denial-of-service system.
 
 ### Known issues when "upgrading" from rmod
 
-- If your script isn't using a program name, there is a possibility that
-  variables will be lost because of program naming scheme changes.
+- Variables in scripts will be lost. Currently, the only way to avoid this is to
+  keep using rmod's scriptblocks until this bug is fixed.
 
 ## What are scriptblocks?
 
