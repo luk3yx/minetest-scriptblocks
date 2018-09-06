@@ -4,6 +4,10 @@
 
 scriptblocks.program_channel = 'Program channel'
 
+local a_b_formspec_handler = scriptblocks.create_formspec_handler(
+    false, 'a', 'b'
+)
+
 scriptblocks.register_with_alias('set', {
     description = 'Scriptblocks: Set',
     tiles = {'scriptblocks_set.png'},
@@ -17,22 +21,11 @@ field[varname;Varname;${varname}]
 field[value;Value;${value}]
 ]])
     end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.channel) then
-            minetest.get_meta(pos):set_string('channel', fields.channel)
-        end
-        if (fields.varname) then
-            minetest.get_meta(pos):set_string('varname', fields.varname)
-        end
-        if (fields.value) then
-            minetest.get_meta(pos):set_string('value', fields.value)
-        end
-    end,
+    
+    on_receive_fields = scriptblocks.create_formspec_handler(
+        false, 'channel', 'varname', 'value'
+    ),
+    
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local channel = scriptblocks.escape(meta:get_string('channel'), info, last)
@@ -65,19 +58,11 @@ field[channel;]] .. scriptblocks.program_channel .. [[ (optional);${channel}]
 field[varname;Varname;${varname}]
 ]])
     end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.channel) then
-            minetest.get_meta(pos):set_string('channel', fields.channel)
-        end
-        if (fields.varname) then
-            minetest.get_meta(pos):set_string('varname', fields.varname)
-        end
-    end,
+    
+    on_receive_fields = scriptblocks.create_formspec_handler(
+        true, 'channel', 'varname'
+    ),
+    
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local channel = scriptblocks.escape(meta:get_string('channel'), info, last)
@@ -106,19 +91,9 @@ field[player;Player (optional);${player}]
 field[message;Message;${message}]
 ]])
     end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.player) then
-            minetest.get_meta(pos):set_string('player', fields.player)
-        end
-        if (fields.message) then
-            minetest.get_meta(pos):set_string('message', fields.message)
-        end
-    end,
+    on_receive_fields = scriptblocks.create_formspec_handler(
+        false, 'player', 'message'
+    ),
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local plr = scriptblocks.escape(meta:get_string('player'), info, last)
@@ -214,19 +189,8 @@ field[a;A;${a}]
 field[b;B;${b}]
 ]])
     end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.a) then
-            minetest.get_meta(pos):set_string('a', fields.a)
-        end
-        if (fields.b) then
-            minetest.get_meta(pos):set_string('b', fields.b)
-        end
-    end,
+    on_recieve_fields = a_b_formspec_handler,
+    
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -250,19 +214,8 @@ field[a;A;${a}]
 field[b;B;${b}]
 ]])
     end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.a) then
-            minetest.get_meta(pos):set_string('a', fields.a)
-        end
-        if (fields.b) then
-            minetest.get_meta(pos):set_string('b', fields.b)
-        end
-    end,
+    on_recieve_fields = a_b_formspec_handler,
+    
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -286,19 +239,8 @@ field[a;A;${a}]
 field[b;B;${b}]
 ]])
     end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.a) then
-            minetest.get_meta(pos):set_string('a', fields.a)
-        end
-        if (fields.b) then
-            minetest.get_meta(pos):set_string('b', fields.b)
-        end
-    end,
+    on_recieve_fields = a_b_formspec_handler,
+    
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -321,20 +263,7 @@ scriptblocks.register_with_alias('divide', {
 field[a;A;${a}]
 field[b;B;${b}]
 ]])
-    end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.a) then
-            minetest.get_meta(pos):set_string('a', fields.a)
-        end
-        if (fields.b) then
-            minetest.get_meta(pos):set_string('b', fields.b)
-        end
-    end,
+    end,on_recieve_fields = a_b_formspec_handler,
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -357,20 +286,7 @@ scriptblocks.register_with_alias('modulo', {
 field[a;A;${a}]
 field[b;B;${b}]
 ]])
-    end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.a) then
-            minetest.get_meta(pos):set_string('a', fields.a)
-        end
-        if (fields.b) then
-            minetest.get_meta(pos):set_string('b', fields.b)
-        end
-    end,
+    end,on_recieve_fields = a_b_formspec_handler,
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -419,19 +335,9 @@ field[propname;Attribute Name;${propname}]
 field[value;Value;${value}]
 ]])
     end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.propname) then
-            minetest.get_meta(pos):set_string('propname', fields.propname)
-        end
-        if (fields.value) then
-            minetest.get_meta(pos):set_string('value', fields.value)
-        end
-    end,
+    on_receive_fields = scriptblocks.create_formspec_handler(
+        false, 'propname', 'value'
+    ),
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local propname = scriptblocks.escape(meta:get_string('propname'), info, last)
@@ -472,16 +378,9 @@ scriptblocks.register_with_alias('get_attribute', {
 field[propname;Attribute Name;${propname}]
 ]])
     end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.propname) then
-            minetest.get_meta(pos):set_string('propname', fields.propname)
-        end
-    end,
+    on_receive_fields = scriptblocks.create_formspec_handler(
+        false, 'propname'
+    ),
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local propname = scriptblocks.escape(meta:get_string('propname'), info, last)
@@ -549,20 +448,7 @@ scriptblocks.register_with_alias('equals', {
 field[a;A;${a}]
 field[b;B;${b}]
 ]])
-    end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.a) then
-            minetest.get_meta(pos):set_string('a', fields.a)
-        end
-        if (fields.b) then
-            minetest.get_meta(pos):set_string('b', fields.b)
-        end
-    end,
+    end,on_recieve_fields = a_b_formspec_handler,
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -582,20 +468,7 @@ scriptblocks.register_with_alias('lt', {
 field[a;A;${a}]
 field[b;B;${b}]
 ]])
-    end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.a) then
-            minetest.get_meta(pos):set_string('a', fields.a)
-        end
-        if (fields.b) then
-            minetest.get_meta(pos):set_string('b', fields.b)
-        end
-    end,
+    end,on_recieve_fields = a_b_formspec_handler,
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -615,20 +488,7 @@ scriptblocks.register_with_alias('gt', {
 field[a;A;${a}]
 field[b;B;${b}]
 ]])
-    end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.a) then
-            minetest.get_meta(pos):set_string('a', fields.a)
-        end
-        if (fields.b) then
-            minetest.get_meta(pos):set_string('b', fields.b)
-        end
-    end,
+    end,on_recieve_fields = a_b_formspec_handler,
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -660,16 +520,9 @@ scriptblocks.register_with_alias('number', {
 field[number;Number literal;${number}]
 ]])
     end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.number) then
-            minetest.get_meta(pos):set_string('number', fields.number)
-        end
-    end,
+    on_receive_fields = scriptblocks.create_formspec_handler(
+        false, 'number'
+    ),
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local number = meta:get_string('number')
@@ -688,16 +541,9 @@ scriptblocks.register_with_alias('string', {
 field[str;String literal;${str}]
 ]])
     end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.str) then
-            minetest.get_meta(pos):set_string('str', fields.str)
-        end
-    end,
+    on_receive_fields = scriptblocks.create_formspec_handler(
+        false, 'str'
+    ),
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local str = meta:get_string('str')

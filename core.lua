@@ -50,14 +50,44 @@ scriptblocks.set_storage = function(data)
     return scriptblocks.storage:set_string('scriptblock', minetest.serialize(data))
 end
 
+-- Is the channel reserved for another user?
+scriptblocks.check_channel = function(name, channel, readonly)
+    -- Channel name RegEx from https://github.com/minetest-mods/pipeworks
+    -- Possibly(?) licensed under the GNU LGPL 2.1
+    local victim, sep = channel:match('^([^:;]+)([:;])')
+    if victim and sep then
+        local valid = victim == name
+        if victim ~= name and (sep ~= ';' or not readonly) then
+            minetest.chat_send_player(name, 'Sorry, only ' .. victim ..
+                ' may use that channel.')
+            return true
+        end
+    end
+    return false
+end
+
+-- Is the node protected?
+scriptblocks.check_protection = function(pos, name, channel, readonly)
+    if type(name) ~= 'string' then
+        name = name:get_player_name()
+    end
+    
+    if minetest.is_protected(pos, name) and
+      not minetest.check_player_privs(name, {protection_bypass=true}) then
+        minetest.record_protection_violation(pos, name)
+        return true
+    end
+    
+    if channel then
+        return scriptblocks.check_channel(name, channel, readonly)
+    end
+    
+    return false
+end
 
 -- To avoid lag and stack overflows, we add the data to a queue and then execute it with a globalstep.
 local queue = {}
-
--- Easily add items to the queue
-scriptblocks.queue = function(pos, sender, info, last, channel)
-    table.insert(queue, {pos, sender, info, last, channel})
-end
+local queue_lock = false
 
 -- Directly execute a scriptblock and return a queue with more scriptblocks
 scriptblocks.run = function(pos, sender, info, last, channel, executions)
@@ -131,10 +161,12 @@ scriptblocks.escape = function(text, info, last)
     return text and text:gsub('@info', info):gsub('@last', last)
 end
 
--- Handle queued scriptblocks
-minetest.register_globalstep(function(dtime)
+-- Handle queued scriptblocks, but only when required.
+local handle_queue
+handle_queue = function()
+    queue_lock = true
     local new_queue = {}
-    for i,data in pairs(queue) do
+    for i, data in pairs(queue) do
         local new_list = scriptblocks.run(unpack(data))
         if new_list then
             for _,new_item in pairs(new_list) do
@@ -143,12 +175,27 @@ minetest.register_globalstep(function(dtime)
         end
         
         if i > scriptblocks.max_per_step then
-            queue = new_queue
-            return
+            break
         end
     end
     queue = new_queue
-end)
+    
+    if #queue > 0 then
+        minetest.after(scriptblocks.tick_delay, handle_queue)
+    else
+        queue_lock = false
+    end
+end
+
+-- Easily add items to the queue
+scriptblocks.queue = function(pos, sender, info, last, channel)
+    table.insert(queue, {pos, sender, info, last, channel})
+    
+    if not queue_lock then
+        -- Start the queue handler
+        handle_queue()
+    end
+end
 
 -- A register with alias function to automatically add aliases
 -- Uses register_alias_force() to unregister the original rmod one first.
@@ -156,4 +203,20 @@ scriptblocks.register_with_alias = function(name, def)
     local new_name = minetest.get_current_modname() .. ':' .. name
     minetest.register_node(new_name, def)
     minetest.register_alias_force('rmod:scriptblock_' .. name, new_name)
+end
+
+-- An easy(-ish) formspec handler
+scriptblocks.create_formspec_handler = function(ro, ...)
+    local names = {...}
+    return function(pos, formname, fields, sender)
+        if scriptblocks.check_protection(pos, sender, fields.channel, ro) then
+            return
+        end
+        local meta = minetest.get_meta(pos)
+        for _, i in ipairs(names) do
+            if fields[i] then
+                meta:set_string(i, fields[i])
+            end
+        end
+    end
 end

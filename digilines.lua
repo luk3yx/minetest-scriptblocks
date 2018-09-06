@@ -11,23 +11,13 @@ scriptblocks.register_with_alias('digiline_receiver', {
     on_construct = function(pos)
         local meta = minetest.get_meta(pos)
         meta:set_string('formspec', [[
-field[progchannel;]] .. scriptblocks.program_channel .. [[;${progchannel}]
+field[channel;]] .. scriptblocks.program_channel .. [[;${channel}]
 field[digichannel;Digiline channel;${digichannel}]
 ]])
     end,
-    on_receive_fields = function(pos, formname, fields, sender)
-        local name = sender:get_player_name()
-        if minetest.is_protected(pos, name) and not minetest.check_player_privs(name, {protection_bypass=true}) then
-            minetest.record_protection_violation(pos, name)
-            return
-        end
-        if (fields.digichannel) then
-            minetest.get_meta(pos):set_string('digichannel', fields.digichannel)
-        end
-        if (fields.progchannel) then
-            minetest.get_meta(pos):set_string('progchannel', fields.progchannel)
-        end
-    end,
+    on_receive_fields = scriptblocks.create_formspec_handler(
+        false, 'channel', 'digichannel'
+    ),
     scriptblock = function (pos, node, sender, info, last, main_channel)
         return
     end,
@@ -36,7 +26,7 @@ field[digichannel;Digiline channel;${digichannel}]
         effector = {
         action = function (pos, node, msgchannel, msg)
             local meta = minetest.get_meta(pos)
-                local progchannel = meta:get_string('progchannel')
+                local progchannel = meta:get_string('channel')
                 local digichannel = meta:get_string('digichannel')
             
             if msgchannel ~= digichannel then return end
