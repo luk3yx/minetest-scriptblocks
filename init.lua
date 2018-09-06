@@ -1,16 +1,34 @@
-rmod = {}  -- In case we need to allow other mods/files to access information.
-local modpath = minetest.get_modpath("rmod")
+--
+-- Minetest scriptblocks mod
+--
 
-dofile(modpath .. "/grate.lua")
-dofile(modpath .. "/conveyor.lua")
-dofile(modpath .. "/crate.lua")
-dofile(modpath .. "/scriptblock.lua")
+-- Settings
+scriptblocks = {
+    -- The maximum length of scriptblocks scripts.
+    max_length = 30,
+    
+    -- The maximum amount of scriptblocks processed during a globalstep
+    max_per_step = 24,
+}
 
-if minetest.get_modpath("mesecons") then 
-	dofile(modpath .. "/meseconveyor.lua")
-	dofile(modpath .. "/mesegrate.lua")
+-- Get the mod path and storage
+local modpath = minetest.get_modpath('scriptblocks')
+scriptblocks.storage = minetest.get_mod_storage()
+
+-- Load scriptblocks lua files
+dofile(modpath .. '/core.lua')
+dofile(modpath .. '/scriptblock.lua')
+
+-- Load mesecons and digilines scriptblocks
+if minetest.get_modpath('mesecons') then
+    dofile(modpath .. '/mesecons.lua')
 end
-if minetest.get_modpath("digilines") then 
-	dofile(modpath .. "/digiconveyor.lua")
-	dofile(modpath .. "/digigrate.lua")
+
+if minetest.get_modpath('digilines') then
+    dofile(modpath .. '/digilines.lua')
+end
+
+-- Override rmod scriptblock functions.
+if minetest.get_modpath('rmod') then
+    rmod.scriptblock = scriptblocks
 end
