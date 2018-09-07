@@ -26,7 +26,7 @@ field[value;Value;${value}]
         false, 'channel', 'varname', 'value'
     ),
     
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local channel = scriptblocks.escape(meta:get_string('channel'), info, last)
             local varname = scriptblocks.escape(meta:get_string('varname'), info, last)
@@ -63,7 +63,7 @@ field[varname;Varname;${varname}]
         true, 'channel', 'varname'
     ),
     
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local channel = scriptblocks.escape(meta:get_string('channel'), info, last)
             local varname = scriptblocks.escape(meta:get_string('varname'), info, last)
@@ -94,7 +94,7 @@ field[message;Message;${message}]
     on_receive_fields = scriptblocks.create_formspec_handler(
         false, 'player', 'message'
     ),
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local plr = scriptblocks.escape(meta:get_string('player'), info, last)
             local msg = scriptblocks.escape(meta:get_string('message'), info, last)
@@ -121,7 +121,7 @@ scriptblocks.register_with_alias('if', {
     groups = {oddly_breakable_by_hand = 1},
     use_texture_alpha = true,
     paramtype2 = 'facedir',
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         -- compatibility for back when this was 'IF EQUALS'
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -161,7 +161,7 @@ scriptblocks.register_with_alias('guide', {
     groups = {oddly_breakable_by_hand = 1},
     use_texture_alpha = true,
     paramtype2 = 'facedir',
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local facedir = node.param2
             local dir = minetest.facedir_to_dir(facedir)
         
@@ -191,7 +191,7 @@ field[b;B;${b}]
     end,
     on_receive_fields = a_b_formspec_handler,
     
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
@@ -216,7 +216,7 @@ field[b;B;${b}]
     end,
     on_receive_fields = a_b_formspec_handler,
     
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
@@ -241,7 +241,7 @@ field[b;B;${b}]
     end,
     on_receive_fields = a_b_formspec_handler,
     
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
@@ -264,7 +264,7 @@ field[a;A;${a}]
 field[b;B;${b}]
 ]])
     end,on_receive_fields = a_b_formspec_handler,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
@@ -287,7 +287,7 @@ field[a;A;${a}]
 field[b;B;${b}]
 ]])
     end,on_receive_fields = a_b_formspec_handler,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
@@ -304,7 +304,7 @@ scriptblocks.register_with_alias('player_detector', {
     tiles = {'scriptblocks_player_detector.png'},
     groups = {oddly_breakable_by_hand = 1},
     use_texture_alpha = true,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local players = minetest.get_connected_players()
         
         local nearest = nil
@@ -338,7 +338,7 @@ field[value;Value;${value}]
     on_receive_fields = scriptblocks.create_formspec_handler(
         false, 'propname', 'value'
     ),
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local propname = scriptblocks.escape(meta:get_string('propname'), info, last)
             local value = scriptblocks.escape(meta:get_string('value'), info, last)
@@ -381,7 +381,7 @@ field[propname;Attribute Name;${propname}]
     on_receive_fields = scriptblocks.create_formspec_handler(
         false, 'propname'
     ),
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local propname = scriptblocks.escape(meta:get_string('propname'), info, last)
         
@@ -404,7 +404,7 @@ scriptblocks.register_with_alias('new_object', {
     tiles = {'scriptblocks_new_object.png'},
     groups = {oddly_breakable_by_hand = 1},
     use_texture_alpha = true,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         return {}
     end
 })
@@ -414,7 +414,7 @@ scriptblocks.register_with_alias('not', {
     tiles = {'scriptblocks_not.png'},
     groups = {oddly_breakable_by_hand = 1},
     use_texture_alpha = true,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         return not info
     end,
 })
@@ -423,7 +423,7 @@ scriptblocks.register_with_alias('and', {
     tiles = {'scriptblocks_and.png'},
     groups = {oddly_breakable_by_hand = 1},
     use_texture_alpha = true,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         return info and last
     end,
 })
@@ -432,7 +432,7 @@ scriptblocks.register_with_alias('or', {
     tiles = {'scriptblocks_or.png'},
     groups = {oddly_breakable_by_hand = 1},
     use_texture_alpha = true,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         return info or last
     end,
 })
@@ -449,7 +449,7 @@ field[a;A;${a}]
 field[b;B;${b}]
 ]])
     end,on_receive_fields = a_b_formspec_handler,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
@@ -469,7 +469,7 @@ field[a;A;${a}]
 field[b;B;${b}]
 ]])
     end,on_receive_fields = a_b_formspec_handler,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
@@ -489,7 +489,7 @@ field[a;A;${a}]
 field[b;B;${b}]
 ]])
     end,on_receive_fields = a_b_formspec_handler,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
@@ -505,7 +505,7 @@ scriptblocks.register_with_alias('type', {
     tiles = {'scriptblocks_type.png'},
     groups = {oddly_breakable_by_hand = 1},
     use_texture_alpha = true,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         return type(info) == 'table' and 'object' or type(info)
     end,
 })
@@ -523,7 +523,7 @@ field[number;Number literal;${number}]
     on_receive_fields = scriptblocks.create_formspec_handler(
         false, 'number'
     ),
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local number = meta:get_string('number')
         
@@ -544,7 +544,7 @@ field[str;String literal;${str}]
     on_receive_fields = scriptblocks.create_formspec_handler(
         false, 'str'
     ),
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local str = meta:get_string('str')
         

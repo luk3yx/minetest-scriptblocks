@@ -18,11 +18,11 @@ field[info;Starting @info;${info}]
     on_receive_fields = scriptblocks.create_formspec_handler(
         false, 'channel', 'info'
     ),
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         return
     end,
     mesecons = {effector = {
-        action_on = function (pos, node)
+        action_on = function(pos, node)
             local meta = minetest.get_meta(pos)
                 local channel = meta:get_string('channel')
                 local info = meta:get_string('info')

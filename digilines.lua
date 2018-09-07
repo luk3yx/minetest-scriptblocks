@@ -18,13 +18,13 @@ field[digichannel;Digiline channel;${digichannel}]
     on_receive_fields = scriptblocks.create_formspec_handler(
         false, 'channel', 'digichannel'
     ),
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         return
     end,
     digiline = {
         receptor = {},
         effector = {
-        action = function (pos, node, msgchannel, msg)
+        action = function(pos, node, msgchannel, msg)
             local meta = minetest.get_meta(pos)
                 local progchannel = meta:get_string('channel')
                 local digichannel = meta:get_string('digichannel')
@@ -58,7 +58,7 @@ field[channel;Digiline channel;${channel}]
             minetest.get_meta(pos):set_string('channel', fields.channel)
         end
     end,
-    scriptblock = function (pos, node, sender, info, last, main_channel)
+    scriptblock = function(pos, node, sender, info, last, main_channel)
         if not digiline then return end
         local meta = minetest.get_meta(pos)
             local channel = meta:get_string('channel')
@@ -68,7 +68,7 @@ field[channel;Digiline channel;${channel}]
     end,
     digiline = {
         receptor = {},
-        effector = {action = function (pos, node, msgchannel, msg)
+        effector = {action = function(pos, node, msgchannel, msg)
         end,}
     }
 })
