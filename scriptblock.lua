@@ -189,7 +189,7 @@ field[a;A;${a}]
 field[b;B;${b}]
 ]])
     end,
-    on_recieve_fields = a_b_formspec_handler,
+    on_receive_fields = a_b_formspec_handler,
     
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
@@ -214,7 +214,7 @@ field[a;A;${a}]
 field[b;B;${b}]
 ]])
     end,
-    on_recieve_fields = a_b_formspec_handler,
+    on_receive_fields = a_b_formspec_handler,
     
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
@@ -239,7 +239,7 @@ field[a;A;${a}]
 field[b;B;${b}]
 ]])
     end,
-    on_recieve_fields = a_b_formspec_handler,
+    on_receive_fields = a_b_formspec_handler,
     
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
@@ -263,7 +263,7 @@ scriptblocks.register_with_alias('divide', {
 field[a;A;${a}]
 field[b;B;${b}]
 ]])
-    end,on_recieve_fields = a_b_formspec_handler,
+    end,on_receive_fields = a_b_formspec_handler,
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -286,7 +286,7 @@ scriptblocks.register_with_alias('modulo', {
 field[a;A;${a}]
 field[b;B;${b}]
 ]])
-    end,on_recieve_fields = a_b_formspec_handler,
+    end,on_receive_fields = a_b_formspec_handler,
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -448,7 +448,7 @@ scriptblocks.register_with_alias('equals', {
 field[a;A;${a}]
 field[b;B;${b}]
 ]])
-    end,on_recieve_fields = a_b_formspec_handler,
+    end,on_receive_fields = a_b_formspec_handler,
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -468,7 +468,7 @@ scriptblocks.register_with_alias('lt', {
 field[a;A;${a}]
 field[b;B;${b}]
 ]])
-    end,on_recieve_fields = a_b_formspec_handler,
+    end,on_receive_fields = a_b_formspec_handler,
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
@@ -488,7 +488,7 @@ scriptblocks.register_with_alias('gt', {
 field[a;A;${a}]
 field[b;B;${b}]
 ]])
-    end,on_recieve_fields = a_b_formspec_handler,
+    end,on_receive_fields = a_b_formspec_handler,
     scriptblock = function (pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
