@@ -32,7 +32,8 @@ because a boolean is not a string. Please keep this in mind as you program with
 scriptblocks, to avoid messy coding (or building) and frustration.
 
 Any scriptblocks script over 30 nodes long will be "cut off" to prevent infinite
-loops.
+loops and fork bombs. If you take advantage of this feature in this code, please
+note that this restriction is arbitrary and may be changed at any time.
 
 ## How to use scriptblocks
 
@@ -138,6 +139,18 @@ the form of a table, you can modify it with the object blocks described earlier.
 
 These are the polar opposites of the Digiline Receivers - they will send the
 data contained in @info on the specified channel.
+
+### Mesecon Sender
+
+Similar to digiline senders, these scriptblocks send out a mesecon signal. They
+can be configured in multiple ways, including:
+
+- `0.1` to `5`: Pulse mode, where the scriptblock send an 'on' signal for a
+    predefined amount of time before sending an 'off' signal.
+- `0`: Toggle mode, where the scriptblock will toggle on and off.
+- `@info`, `@last`: Evaluate either `@info` or `@last` and turn on or off
+    accordingly. If the value is a number, it will switch to pulse mode and use
+    the time specified as the delay.
 
 ### Type blocks
 
