@@ -1,9 +1,9 @@
 # Scriptblocks
 
-A RMod fork that removes everything except scriptblocks, and adds to
+A [rmod] fork that removes everything except scriptblocks, and adds to
 scriptblocks and makes them more efficient.
 
-## RMod compatibility
+## [rmod] compatibility
 
 The scriptblocks mod aims to keep backwards compatibility with rmod, so servers
 that used to use or are even still using rmod will face no issues when changing
@@ -159,3 +159,5 @@ booleans, and tables (called objects in this mod). You can use the GET TYPE
 block to get the type of the current @info, and you can use the NUMBER LITERAL
 and STRING LITERAL blocks to set @info to a set value (even the string "@info"
 itself - the automatic substitution system isn't applied here).
+
+[rmod]: https://gitlab.com/rdococ/rmod
