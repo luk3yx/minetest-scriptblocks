@@ -28,9 +28,9 @@ field[digichannel;Digiline channel;${digichannel}]
             local meta = minetest.get_meta(pos)
                 local progchannel = meta:get_string('channel')
                 local digichannel = meta:get_string('digichannel')
-            
+
             if msgchannel ~= digichannel then return end
-            
+
             scriptblocks.queue(pos, pos, msg, '', progchannel)
         end,
     }}
@@ -62,7 +62,7 @@ field[channel;Digiline channel;${channel}]
         if not digiline then return end
         local meta = minetest.get_meta(pos)
             local channel = meta:get_string('channel')
-        
+
         digiline:receptor_send(pos, digiline.rules.default, channel, info)
         return
     end,

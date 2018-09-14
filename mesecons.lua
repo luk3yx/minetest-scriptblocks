@@ -26,7 +26,7 @@ field[info;Starting @info;${info}]
             local meta = minetest.get_meta(pos)
                 local channel = meta:get_string('channel')
                 local info = meta:get_string('info')
-            
+
             scriptblocks.queue(pos, pos, info or '', '', channel)
         end,
     }}
@@ -80,7 +80,7 @@ field[mode;Pulse delay (0 to toggle, @info/@last for if);${mode}]
         else
             cond = tonumber(mode)
         end
-        
+
         if type(cond) == 'number' then
             local delay = cond
             cond = true
@@ -94,7 +94,7 @@ field[mode;Pulse delay (0 to toggle, @info/@last for if);${mode}]
             end
             minetest.after(delay, disable_sender, pos)
         end
-        
+
         if cond ~= nil then
             local state
             if cond then

@@ -21,28 +21,28 @@ field[varname;Varname;${varname}]
 field[value;Value;${value}]
 ]])
     end,
-    
+
     on_receive_fields = scriptblocks.create_formspec_handler(
         false, 'channel', 'varname', 'value'
     ),
-    
+
     scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local channel = scriptblocks.escape(meta:get_string('channel'), info, last)
             local varname = scriptblocks.escape(meta:get_string('varname'), info, last)
             local value = scriptblocks.escape(meta:get_string('value'), info, last)
-        
+
         local store = scriptblocks.get_storage()
-        
+
         if channel == '' or not channel then channel = main_channel end
-        
+
         if not varname then varname = '' end
-        
+
         if not store[channel] then store[channel] = {} end
         store[channel][varname] = value
 
         scriptblocks.set_storage(store)
-        
+
         return
     end
 })
@@ -58,23 +58,23 @@ field[channel;]] .. scriptblocks.program_channel .. [[ (optional);${channel}]
 field[varname;Varname;${varname}]
 ]])
     end,
-    
+
     on_receive_fields = scriptblocks.create_formspec_handler(
         true, 'channel', 'varname'
     ),
-    
+
     scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local channel = scriptblocks.escape(meta:get_string('channel'), info, last)
             local varname = scriptblocks.escape(meta:get_string('varname'), info, last)
-        
+
         local store = scriptblocks.get_storage()
-        
+
         if channel == '' or not channel then channel = main_channel end
         if not varname then return end
-        
+
         if not store[channel] then store[channel] = {} end
-        
+
         return store[channel][varname]
     end
 })
@@ -98,18 +98,18 @@ field[message;Message;${message}]
         local meta = minetest.get_meta(pos)
             local plr = scriptblocks.escape(meta:get_string('player'), info, last)
             local msg = scriptblocks.escape(meta:get_string('message'), info, last)
-        
+
         if not plr then return end
         if not msg then return end
-        
+
         if type(msg) == 'table' then msg = scriptblocks.stringify(msg) end
-        
+
         if plr == '' then
             minetest.chat_send_all('Scriptblock -> all: ' .. tostring(msg))
         else
             minetest.chat_send_player(plr, 'Scriptblock -> you: ' .. tostring(msg))
         end
-        
+
         return
     end
 })
@@ -126,26 +126,26 @@ scriptblocks.register_with_alias('if', {
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
-        
+
         local facedir = node.param2
             local dir = minetest.facedir_to_dir(facedir)
-        
+
         -- Y, -Y, X, -X, Z, -Z.
-        
+
         local truth = {}
         local falsth = {}
             if dir.x == 1 then truth[3] = true; falsth[4] = true
         elseif dir.x == -1 then truth[4] = true; falsth[3] = true
         elseif dir.z == 1 then truth[5] = true; falsth[6] = true
         elseif dir.z == -1 then truth[6] = true; falsth[5] = true end
-        
+
         --[[if type(a) == 'table' then
             a = scriptblocks.stringify(a) or a
         end
         if type(b) == 'table' then
             b = scriptblocks.stringify(b) or b
         end]]
-        
+
         if a == '' and b == '' then
             return unpack(info and {nil, truth} or {nil, falsth})
         else
@@ -164,15 +164,15 @@ scriptblocks.register_with_alias('guide', {
     scriptblock = function(pos, node, sender, info, last, main_channel)
         local facedir = node.param2
             local dir = minetest.facedir_to_dir(facedir)
-        
+
         -- Y, -Y, X, -X, Z, -Z.
-        
+
         local guide = {}
             if dir.x == 1 then guide[3] = true
         elseif dir.x == -1 then guide[4] = true
         elseif dir.z == 1 then guide[5] = true
         elseif dir.z == -1 then guide[6] = true end
-        
+
         return nil, guide
     end
 })
@@ -190,15 +190,15 @@ field[b;B;${b}]
 ]])
     end,
     on_receive_fields = a_b_formspec_handler,
-    
+
     scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
-        
+
         local facedir = node.param2
             local dir = minetest.facedir_to_dir(facedir)
-        
+
         return (tonumber(a) or 0) + (tonumber(b) or 0)
     end
 })
@@ -215,15 +215,15 @@ field[b;B;${b}]
 ]])
     end,
     on_receive_fields = a_b_formspec_handler,
-    
+
     scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
-        
+
         local facedir = node.param2
             local dir = minetest.facedir_to_dir(facedir)
-        
+
         return (tonumber(a) or 0) - (tonumber(b) or 0)
     end
 })
@@ -240,15 +240,15 @@ field[b;B;${b}]
 ]])
     end,
     on_receive_fields = a_b_formspec_handler,
-    
+
     scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
-        
+
         local facedir = node.param2
             local dir = minetest.facedir_to_dir(facedir)
-        
+
         return (tonumber(a) or 0) * (tonumber(b) or 0)
     end
 })
@@ -268,10 +268,10 @@ field[b;B;${b}]
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
-        
+
         local facedir = node.param2
             local dir = minetest.facedir_to_dir(facedir)
-        
+
         return (tonumber(a) or 0) / (tonumber(b) or 0)
     end
 })
@@ -291,10 +291,10 @@ field[b;B;${b}]
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
-        
+
         local facedir = node.param2
             local dir = minetest.facedir_to_dir(facedir)
-        
+
         return (tonumber(a) or 0) % (tonumber(b) or 0)
     end
 })
@@ -306,7 +306,7 @@ scriptblocks.register_with_alias('player_detector', {
     use_texture_alpha = true,
     scriptblock = function(pos, node, sender, info, last, main_channel)
         local players = minetest.get_connected_players()
-        
+
         local nearest = nil
         local min_distance = math.huge
         for index, player in pairs(players) do
@@ -316,7 +316,7 @@ scriptblocks.register_with_alias('player_detector', {
                 nearest = player:get_player_name()
             end
         end
-        
+
         return nearest or ''
     end
 })
@@ -342,9 +342,9 @@ field[value;Value;${value}]
         local meta = minetest.get_meta(pos)
             local propname = scriptblocks.escape(meta:get_string('propname'), info, last)
             local value = scriptblocks.escape(meta:get_string('value'), info, last)
-        
+
         if not propname then return end
-        
+
         if type(info) ~= 'table' then
             --[[if type(info) == 'string' then
                 local deserialized = minetest.deserialize(info)
@@ -353,7 +353,7 @@ field[value;Value;${value}]
                 return
             --end
         end
-        
+
         -- We want to avoid problems like this:
         -- serialize({nest = serialize({table})) =/= serialize({nest = {table}})
         -- so we automatically deserialize the value if it can be deserialized.
@@ -361,9 +361,9 @@ field[value;Value;${value}]
             local deserialized = minetest.deserialize(value)
             if deserialized then value = deserialized end
         end]]
-        
+
         info[propname] = value
-        
+
         return info
     end
 })
@@ -384,9 +384,9 @@ field[propname;Attribute Name;${propname}]
     scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local propname = scriptblocks.escape(meta:get_string('propname'), info, last)
-        
+
         if not propname then return end
-        
+
         if type(info) ~= 'table' then
             --[[if type(info) == 'string' then
                 local deserialized = minetest.deserialize(info)
@@ -395,7 +395,7 @@ field[propname;Attribute Name;${propname}]
                 return
             --end
         end
-        
+
         return info[propname]
     end
 })
@@ -453,7 +453,7 @@ field[b;B;${b}]
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
-        
+
         return scriptblocks.compare(a, b)
     end,
 })
@@ -473,7 +473,7 @@ field[b;B;${b}]
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
-        
+
         return (tonumber(a) or 0) < (tonumber(b) or 0)
     end,
 })
@@ -493,7 +493,7 @@ field[b;B;${b}]
         local meta = minetest.get_meta(pos)
             local a = scriptblocks.escape(meta:get_string('a'), info, last)
             local b = scriptblocks.escape(meta:get_string('b'), info, last)
-        
+
         return (tonumber(a) or 0) > (tonumber(b) or 0)
     end,
 })
@@ -526,7 +526,7 @@ field[number;Number literal;${number}]
     scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local number = meta:get_string('number')
-        
+
         return tonumber(number)
     end,
 })
@@ -547,7 +547,7 @@ field[str;String literal;${str}]
     scriptblock = function(pos, node, sender, info, last, main_channel)
         local meta = minetest.get_meta(pos)
             local str = meta:get_string('str')
-        
+
         return str
     end,
 })

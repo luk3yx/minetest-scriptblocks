@@ -6,10 +6,10 @@
 scriptblocks = {
     -- The maximum length of scriptblocks scripts.
     max_length = 30,
-    
+
     -- The maximum amount of scriptblocks processed during a globalstep
     max_per_step = 24,
-    
+
     -- The "tick" delay - How long to wait between processing scriptblocks
     -- NOTE: If this is set too high, scriptblocks will appear unresponsive.
     tick_delay = 0.1,

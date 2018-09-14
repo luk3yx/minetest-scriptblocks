@@ -13,7 +13,7 @@
 --
 --        <insert function code here>
 --
---   return new_info, faces 
+--   return new_info, faces
 --   Information to pass to the next node(s), and information on which adjacent
 --      spaces we should even try to signal to. This return statement is
 --      optional and can be omitted entirely.
@@ -29,14 +29,14 @@ scriptblocks.compare = function(a, b)
     -- Compare two tables by comparing their values -
     -- also make sure to support nested tables.
     if type(a) ~= 'table' or type(b) ~= 'table' then return a == b end
-    
+
     for i,j in pairs(a) do
         if not compare(j, b[i]) then return false end
     end
     for i,j in pairs(b) do
         if not compare(j, a[i]) then return false end
     end
-    
+
     return true
 end
 
@@ -71,17 +71,17 @@ scriptblocks.check_protection = function(pos, name, channel, readonly)
     if type(name) ~= 'string' then
         name = name:get_player_name()
     end
-    
+
     if minetest.is_protected(pos, name) and
       not minetest.check_player_privs(name, {protection_bypass=true}) then
         minetest.record_protection_violation(pos, name)
         return true
     end
-    
+
     if channel then
         return scriptblocks.check_channel(name, channel, readonly)
     end
-    
+
     return false
 end
 
@@ -92,18 +92,18 @@ local queue_lock = false
 -- Directly execute a scriptblock and return a queue with more scriptblocks
 scriptblocks.run = function(pos, sender, info, last, channel, executions)
     local local_queue = {}
-    
+
     if executions == nil then
         executions = scriptblocks.max_length
     elseif executions <= 0 then
         return
     end
-    
+
     -- Get information about this script block we are told to execute.
     local node = minetest.get_node(pos)
         local name = node.name
             local def = minetest.registered_nodes[name]
-    
+
     -- If the block is a script block...
     if def and def.scriptblock then
         local new_info, faces = def.scriptblock(pos, node, sender, info, last, channel)
@@ -120,19 +120,19 @@ scriptblocks.run = function(pos, sender, info, last, channel, executions)
                 elseif i == 4 then dir.x = -1
                 elseif i == 5 then dir.z = 1
                 elseif i == 6 then dir.z = -1 end
-            
+
                 local new_pos = vector.add(pos, dir)
-            
+
                 -- This is required, otherwise you'd have an unintentional feedback loop.
                 -- Feedback loops can still be created intentionally, though.
                 if not vector.equals(new_pos, sender) then
                     local new_node = minetest.get_node(new_pos)
                         local new_name = new_node.name
                             local new_def = minetest.registered_nodes[new_name]
-            
+
                     if new_def and new_def.scriptblock then
                         local new_last
-                        if new_info ~= nil then  -- If something has been pushed to the stack, 
+                        if new_info ~= nil then  -- If something has been pushed to the stack,
                             new_last = info  -- we update @last.
                         else
                             new_info = info  -- Why bother updating it?
@@ -152,10 +152,10 @@ end
 scriptblocks.escape = function(text, info, last)
     local info = tostring(info or '')
     local last = tostring(last or '')
-    
+
     if text == '@info' then return info end
     if text == '@last' then return last end
-    
+
     if type(info) == 'table' then info = scriptblocks.stringify(info) or '' end
     if type(last) == 'table' then last = scriptblocks.stringify(last) or '' end
     return text and text:gsub('@info', info):gsub('@last', last)
@@ -173,13 +173,13 @@ handle_queue = function()
                 table.insert(new_queue, new_item)
             end
         end
-        
+
         if i > scriptblocks.max_per_step then
             break
         end
     end
     queue = new_queue
-    
+
     if #queue > 0 then
         minetest.after(scriptblocks.tick_delay, handle_queue)
     else
@@ -190,12 +190,12 @@ end
 -- Easily add items to the queue
 scriptblocks.queue = function(pos, sender, info, last, channel)
     if channel == '' then channel = false end
-    
+
     table.insert(queue, {
         pos, sender, info, last,
         channel or ('the server:' .. minetest.pos_to_string(pos))
     })
-    
+
     if not queue_lock then
         -- Start the queue handler
         handle_queue()
