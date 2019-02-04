@@ -310,7 +310,7 @@ scriptblocks.register_with_alias('player_detector', {
         local nearest = nil
         local min_distance = math.huge
         for index, player in pairs(players) do
-            local distance = vector.distance(pos, player:getpos())
+            local distance = vector.distance(pos, player:get_pos())
             if distance < min_distance then
                 min_distance = distance
                 nearest = player:get_player_name()
